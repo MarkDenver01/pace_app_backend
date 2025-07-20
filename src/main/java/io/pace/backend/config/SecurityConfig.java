@@ -95,6 +95,7 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf ->
                 csrf.ignoringRequestMatchers("/user/public/login")
+                        .ignoringRequestMatchers("/user/public/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
         http.cors(cors -> corsConfig.corsConfigurationSource());
         http.authorizeHttpRequests((requests)

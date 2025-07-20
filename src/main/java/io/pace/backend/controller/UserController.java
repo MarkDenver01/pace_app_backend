@@ -1,5 +1,6 @@
 package io.pace.backend.controller;
 
+import io.pace.backend.data.entity.Questions;
 import io.pace.backend.data.entity.Role;
 import io.pace.backend.data.entity.User;
 import io.pace.backend.data.state.RoleState;
@@ -7,9 +8,12 @@ import io.pace.backend.domain.request.LoginRequest;
 import io.pace.backend.domain.request.RegisterRequest;
 import io.pace.backend.domain.response.LoginResponse;
 import io.pace.backend.domain.response.MessageResponse;
+import io.pace.backend.domain.response.QuestionResponse;
 import io.pace.backend.domain.response.UsernameResponse;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
+import io.pace.backend.service.course.CourseService;
+import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
@@ -30,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,7 +60,12 @@ public class UserController {
     UserService userService;
 
     @Autowired
+    CourseService courseService;
+
+    @Autowired
     AuthUtil authUtil;
+    @Autowired
+    private QuestionService questionService;
 
     @PostMapping("/public/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -98,60 +108,81 @@ public class UserController {
     @PostMapping("/public/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Email already exists"));
+            return ResponseEntity.badRequest().body(new MessageResponse("already exist"));
         }
 
-        // create a new user account
+        // Create new user with encoded password
         User user = new User(
                 registerRequest.getUsername(),
                 registerRequest.getEmail(),
                 passwordEncoder.encode(registerRequest.getPassword()));
 
+        // Default role = USER if roles not provided
         Set<String> tempRoles = registerRequest.getRoles();
         Role role;
 
         if (tempRoles == null || tempRoles.isEmpty()) {
             role = roleRepository.findRoleByRoleState(RoleState.USER)
-                    .orElseThrow(() -> new RuntimeException("No role found"));
+                    .orElseGet(() -> {
+                        Role newRole = new Role();
+                        newRole.setRoleState(RoleState.USER);
+                        return roleRepository.save(newRole);
+                    });
         } else {
-            String userRoles = tempRoles.iterator().next();
-            switch (userRoles) {
+            String userRole = tempRoles.iterator().next().toLowerCase();
+
+            switch (userRole) {
                 case "admin":
                     role = roleRepository.findRoleByRoleState(RoleState.ADMIN)
-                            .orElseThrow(() -> new RuntimeException("No role found"));
+                            .orElseGet(() -> {
+                                Role newRole = new Role();
+                                newRole.setRoleState(RoleState.ADMIN);
+                                return roleRepository.save(newRole);
+                            });
                     break;
                 case "super_admin":
                     role = roleRepository.findRoleByRoleState(RoleState.SUPER_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("No role found"));
+                            .orElseGet(() -> {
+                                Role newRole = new Role();
+                                newRole.setRoleState(RoleState.SUPER_ADMIN);
+                                return roleRepository.save(newRole);
+                            });
                     break;
                 case "user":
                 default:
                     role = roleRepository.findRoleByRoleState(RoleState.USER)
-                            .orElseThrow(() -> new RuntimeException("No role found"));
+                            .orElseGet(() -> {
+                                Role newRole = new Role();
+                                newRole.setRoleState(RoleState.USER);
+                                return roleRepository.save(newRole);
+                            });
                     break;
             }
 
             user.setSignupMethod("email");
         }
-        user.setRole(role);
+
+        user.setRole(role); // Set single role
         userRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("User registered successfully"));
+
+        return ResponseEntity.ok(new MessageResponse("success"));
     }
+
 
     @GetMapping("/public/get_username")
     public ResponseEntity<?> getUsername(@AuthenticationPrincipal UserDetails userDetails) {
         return (userDetails != null
                 ? ResponseEntity.ok(new UsernameResponse(userDetails.getUsername()))
-                :  ResponseEntity.badRequest().body(new MessageResponse("User not found")));
+                :  ResponseEntity.badRequest().body(new MessageResponse("user not found")));
     }
 
     @PostMapping("/public/forgot_password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             userService.generatePasswordResetToken(email);
-            return ResponseEntity.ok(new MessageResponse("Password reset token generated successfully"));
+            return ResponseEntity.ok(new MessageResponse("success"));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new MessageResponse("Internal Server Error"));
+            return ResponseEntity.internalServerError().body(new MessageResponse("internal server error"));
         }
     }
 
@@ -160,10 +191,15 @@ public class UserController {
                                            @RequestParam String newPassword) {
         try {
             userService.resetPassword(token, newPassword);
-            return ResponseEntity.ok(new MessageResponse("Password reset token updated successfully"));
+            return ResponseEntity.ok(new MessageResponse("success"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse(e.getMessage()));
         }
+    }
+
+    @GetMapping("/public/questions")
+    public ResponseEntity<List<QuestionResponse>> getAllQuestions() {
+        return ResponseEntity.ok(questionService.getAllQuestions());
     }
 }
