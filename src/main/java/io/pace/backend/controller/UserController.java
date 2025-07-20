@@ -169,7 +169,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/public/get_username")
+    @GetMapping("/api/get_username")
     public ResponseEntity<?> getUsername(@AuthenticationPrincipal UserDetails userDetails) {
         return (userDetails != null
                 ? ResponseEntity.ok(new UsernameResponse(userDetails.getUsername()))
@@ -186,7 +186,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/public/reset_password")
+    @PostMapping("/api/reset_password")
     public ResponseEntity<?> resetPassword(@RequestParam String token,
                                            @RequestParam String newPassword) {
         try {
@@ -198,7 +198,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/public/questions")
+    @GetMapping("/api/questions")
     public ResponseEntity<List<QuestionResponse>> getAllQuestions() {
         return ResponseEntity.ok(questionService.getAllQuestions());
     }

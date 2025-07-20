@@ -94,29 +94,43 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf ->
-                csrf.ignoringRequestMatchers("/user/public/login")
-                        .ignoringRequestMatchers("/user/public/register")
+                csrf.ignoringRequestMatchers("/user/public/login", "/user/public/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+
         http.cors(cors -> corsConfig.corsConfigurationSource());
-        http.authorizeHttpRequests((requests)
-                        -> requests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/superadmin/**").hasAuthority("SUPER_ADMIN")
-                        .requestMatchers("/csrf_token").permitAll()
-                        .requestMatchers("/user/public/**").permitAll()
-                        .requestMatchers("/oauth2/**").permitAll()
-                        .anyRequest().authenticated())
-                .oauth2Login(oAuth2Login
-                        -> oAuth2Login.successHandler(authorizedHandler));
+
+        http.authorizeHttpRequests((requests) -> requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Allow unauthenticated access to these:
+                .requestMatchers("/csrf_token").permitAll()
+                .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/user/public/**").permitAll()
+
+                // Require auth even if it's under /user/api
+                .requestMatchers("/user/api/**").authenticated()
+
+                // Role-based access
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/superadmin/**").hasAuthority("SUPER_ADMIN")
+
+                // All other requests need authentication
+                .anyRequest().authenticated());
+
+        http.oauth2Login(oAuth2Login ->
+                oAuth2Login.successHandler(authorizedHandler));
+
         http.exceptionHandling(exception ->
                 exception.authenticationEntryPoint(unAuthorizedHandler));
-        http.addFilterBefore(authTokenFilter(),
-                UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
         http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
+
 
 
 }
