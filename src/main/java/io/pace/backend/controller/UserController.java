@@ -6,12 +6,10 @@ import io.pace.backend.data.entity.User;
 import io.pace.backend.data.state.RoleState;
 import io.pace.backend.domain.request.LoginRequest;
 import io.pace.backend.domain.request.RegisterRequest;
-import io.pace.backend.domain.response.LoginResponse;
-import io.pace.backend.domain.response.MessageResponse;
-import io.pace.backend.domain.response.QuestionResponse;
-import io.pace.backend.domain.response.UsernameResponse;
+import io.pace.backend.domain.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
+import io.pace.backend.service.course.CourseMatchService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
@@ -64,8 +62,12 @@ public class UserController {
 
     @Autowired
     AuthUtil authUtil;
+
     @Autowired
     private QuestionService questionService;
+
+    @Autowired
+    private CourseMatchService courseMatchService;
 
     @PostMapping("/public/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -201,5 +203,11 @@ public class UserController {
     @GetMapping("/api/questions")
     public ResponseEntity<List<QuestionResponse>> getAllQuestions() {
         return ResponseEntity.ok(questionService.getAllQuestions());
+    }
+
+    @PostMapping("/api/course_match")
+    public ResponseEntity<List<CourseMatchResponse>> getCourseMatches(@RequestBody List<Long> yesAnsweredQuestionIds) {
+        List<CourseMatchResponse> results = courseMatchService.getCourseMatchResults(yesAnsweredQuestionIds);
+        return ResponseEntity.ok(results);
     }
 }

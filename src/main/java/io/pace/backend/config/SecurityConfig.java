@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,38 +28,52 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true,
-        jsr250Enabled = true)
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
+
     @Autowired
     private AuthEntryPoint unAuthorizedHandler;
 
     @Autowired
     @Lazy
-    SocialAuthenticationHandler authorizedHandler;
+    private SocialAuthenticationHandler authorizedHandler;
 
     @Autowired
-    CorsConfig corsConfig;
+    private CorsConfig corsConfig;
 
+    /**
+     * Filter to handle JWT token in request header.
+     */
     @Bean
     public AuthTokenFilter authTokenFilter() {
         return new AuthTokenFilter();
     }
 
+    /**
+     * Password encoder used for hashing passwords (BCrypt).
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Spring authentication manager bean.
+     */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
+    /**
+     * Initialize default roles and users (super admin, admin) if not present in DB.
+     */
     @Bean
-    public CommandLineRunner init(RoleRepository roleRepository,
-                                  UserRepository userRepository,
-                                  PasswordEncoder passwordEncoder) {
+    public CommandLineRunner init(
+            RoleRepository roleRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         return args -> {
             Role superAdminRole = roleRepository.findRoleByRoleState(RoleState.SUPER_ADMIN)
                     .orElseGet(() -> roleRepository.save(new Role(RoleState.SUPER_ADMIN)));
@@ -66,8 +81,6 @@ public class SecurityConfig {
             Role adminRole = roleRepository.findRoleByRoleState(RoleState.ADMIN)
                     .orElseGet(() -> roleRepository.save(new Role(RoleState.ADMIN)));
 
-
-            // for super admin
             if (!userRepository.existsByEmail("pace@superadmin.com")) {
                 User user = new User(
                         "Super Administrator",
@@ -78,7 +91,6 @@ public class SecurityConfig {
                 userRepository.save(user);
             }
 
-            // for admin
             if (!userRepository.existsByEmail("pace@admin.com")) {
                 User user = new User(
                         "Administrator",
@@ -91,46 +103,49 @@ public class SecurityConfig {
         };
     }
 
+    /**
+     * Main Spring Security filter chain configuration.
+     */
     @Bean
-    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf ->
-                csrf.ignoringRequestMatchers("/user/public/login", "/user/public/register")
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                // Enable CSRF protection except for these endpoints
+//                .csrf(csrf -> csrf
+//                        .ignoringRequestMatchers("/user/public/login", "/user/public/register")
+//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .csrf(csrf -> csrf.disable()) // disable csrf (recommended for APIs with JWT)
 
-        http.cors(cors -> corsConfig.corsConfigurationSource());
+                // Enable CORS with custom configuration
+                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
 
-        http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Authorization rules
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/csrf_token").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/user/public/**").permitAll()
+                        .requestMatchers("/user/api/**").authenticated()
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/superadmin/**").hasAuthority("SUPER_ADMIN")
+                        .anyRequest().authenticated())
 
-                // Allow unauthenticated access to these:
-                .requestMatchers("/csrf_token").permitAll()
-                .requestMatchers("/oauth2/**").permitAll()
-                .requestMatchers("/user/public/**").permitAll()
+                // OAuth2 login handling
+                .oauth2Login(oauth -> oauth.successHandler(authorizedHandler))
 
-                // Require auth even if it's under /user/api
-                .requestMatchers("/user/api/**").authenticated()
+                // Exception handling (unauthorized access)
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unAuthorizedHandler))
 
-                // Role-based access
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                .requestMatchers("/superadmin/**").hasAuthority("SUPER_ADMIN")
+                // Add JWT token filter before the username/password filter
+                .addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
 
-                // All other requests need authentication
-                .anyRequest().authenticated());
+                // configures Spring Security to not use HTTP sessions at all.
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        http.oauth2Login(oAuth2Login ->
-                oAuth2Login.successHandler(authorizedHandler));
-
-        http.exceptionHandling(exception ->
-                exception.authenticationEntryPoint(unAuthorizedHandler));
-
-        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        http.formLogin(Customizer.withDefaults());
-        http.httpBasic(Customizer.withDefaults());
+                // Enable form login and basic auth
+                .formLogin(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
-
-
-
 }
