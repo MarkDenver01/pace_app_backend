@@ -6,8 +6,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CourseMatchResponse {
+    private Long courseId;
     private String courseName;
     private String courseDescription;
-    private int matchPercentage;
+    private double matchPercentage;
     private String recommendationMessage;
 }

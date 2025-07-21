@@ -1,15 +1,15 @@
 package io.pace.backend.controller;
 
-import io.pace.backend.data.entity.Questions;
 import io.pace.backend.data.entity.Role;
 import io.pace.backend.data.entity.User;
 import io.pace.backend.data.state.RoleState;
+import io.pace.backend.domain.request.AnsweredQuestionRequest;
 import io.pace.backend.domain.request.LoginRequest;
 import io.pace.backend.domain.request.RegisterRequest;
 import io.pace.backend.domain.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
-import io.pace.backend.service.course.CourseMatchService;
+import io.pace.backend.service.course.CourseRecommendationService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
@@ -67,7 +67,7 @@ public class UserController {
     private QuestionService questionService;
 
     @Autowired
-    private CourseMatchService courseMatchService;
+    private CourseRecommendationService courseRecommendationService;
 
     @PostMapping("/public/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -205,9 +205,9 @@ public class UserController {
         return ResponseEntity.ok(questionService.getAllQuestions());
     }
 
-    @PostMapping("/api/course_match")
-    public ResponseEntity<List<CourseMatchResponse>> getCourseMatches(@RequestBody List<Long> yesAnsweredQuestionIds) {
-        List<CourseMatchResponse> results = courseMatchService.getCourseMatchResults(yesAnsweredQuestionIds);
+    @PostMapping("/api/course_recommended/top3")
+    public ResponseEntity<List<CourseMatchResponse>> getRecommendedCourse(@RequestBody List<AnsweredQuestionRequest> answers) {
+        List<CourseMatchResponse> results = courseRecommendationService.getTopCourses(answers);
         return ResponseEntity.ok(results);
     }
 }
