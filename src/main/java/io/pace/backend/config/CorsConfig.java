@@ -11,13 +11,23 @@ import java.util.List;
 
 @Configuration
 public class CorsConfig {
-    @Value("${base.url}")
-    private String baseUrl;
+    @Value("${base.url.react}")
+    private String reactBaseUrl;
+
+    @Value("${base.url.android}")
+    private String androidBaseUrl;
+
+    @Value("${base.url.backend}")
+    private String backendBaseUrl;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(baseUrl)); // base URL
+        config.setAllowedOrigins(List.of(
+                backendBaseUrl,
+                reactBaseUrl,
+                androidBaseUrl
+        )); // base URL
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // required for cookies/session

@@ -24,7 +24,7 @@ import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
 
 @Service
 public class UserService implements UserDomainService {
-    @Value("${base.url}")
+    @Value("${base.url.react}")
     String baseUrl;
 
     @Autowired

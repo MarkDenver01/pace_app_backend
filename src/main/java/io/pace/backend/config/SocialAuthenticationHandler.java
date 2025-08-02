@@ -36,7 +36,7 @@ public class SocialAuthenticationHandler extends SavedRequestAwareAuthentication
     @Autowired
     private final JwtUtils jwtUtils;
 
-    @Value("${base.url}")
+    @Value("${base.url.backend}")
     private String baseUrl;
 
     String email;
