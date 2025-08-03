@@ -46,6 +46,9 @@ public class User {
     @ToString.Exclude
     private Role role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Student student;
+
     public User(String userName, String email, String password) {
         this.userName = userName;
         this.email = email;
