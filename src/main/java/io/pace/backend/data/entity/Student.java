@@ -1,5 +1,6 @@
 package io.pace.backend.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.pace.backend.domain.enums.AccountStatus;
 import jakarta.persistence.*;
@@ -37,6 +38,11 @@ public class Student {
     private String email;
 
     @Column(name = "requested_date")
+    @JsonFormat(
+            shape = JsonFormat.Shape.STRING,
+            pattern = "MMM dd, yyyy hh:mm a",
+            timezone = "Asia/Manila" // or GMT+8
+    )
     private LocalDateTime requestedDate;
 
     @Enumerated(EnumType.STRING)
