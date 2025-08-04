@@ -1,11 +1,15 @@
 package io.pace.backend.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.pace.backend.domain.enums.AccountStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -32,24 +36,15 @@ public class Student {
     @Column(name = "email")
     private String email;
 
-    @NotBlank
-    @Size(max = 20)
     @Column(name = "requested_date")
-    private String requestedDate;
+    private LocalDateTime requestedDate;
 
-    @NotBlank
-    @Size(max = 20)
-    @Column(name = "user_account_status")
-    private int userAccountStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_account_status", length = 20)
+    private AccountStatus userAccountStatus;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JsonIgnore
     private User user;
-
-    public Student(String userName, String email, String requestedDate, int userAccountStatus) {
-        this.userName = userName;
-        this.email = email;
-        this.requestedDate = requestedDate;
-        this.userAccountStatus = userAccountStatus;
-    }
 }

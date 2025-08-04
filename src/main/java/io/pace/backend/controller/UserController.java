@@ -1,6 +1,7 @@
 package io.pace.backend.controller;
 
 import io.pace.backend.data.entity.Role;
+import io.pace.backend.data.entity.Student;
 import io.pace.backend.data.entity.User;
 import io.pace.backend.data.state.RoleState;
 import io.pace.backend.domain.request.AnsweredQuestionRequest;
@@ -113,59 +114,40 @@ public class UserController {
             return ResponseEntity.badRequest().body(new MessageResponse("already exist"));
         }
 
-        // Create new user with encoded password
         User user = new User(
                 registerRequest.getUsername(),
                 registerRequest.getEmail(),
                 passwordEncoder.encode(registerRequest.getPassword()));
 
-        // Default role = USER if roles not provided
         Set<String> tempRoles = registerRequest.getRoles();
         Role role;
 
         if (tempRoles == null || tempRoles.isEmpty()) {
             role = roleRepository.findRoleByRoleState(RoleState.USER)
-                    .orElseGet(() -> {
-                        Role newRole = new Role();
-                        newRole.setRoleState(RoleState.USER);
-                        return roleRepository.save(newRole);
-                    });
+                    .orElseGet(() -> roleRepository.save(new Role(RoleState.USER)));
         } else {
             String userRole = tempRoles.iterator().next().toLowerCase();
-
             switch (userRole) {
                 case "admin":
                     role = roleRepository.findRoleByRoleState(RoleState.ADMIN)
-                            .orElseGet(() -> {
-                                Role newRole = new Role();
-                                newRole.setRoleState(RoleState.ADMIN);
-                                return roleRepository.save(newRole);
-                            });
+                            .orElseGet(() -> roleRepository.save(new Role(RoleState.ADMIN)));
                     break;
                 case "super_admin":
                     role = roleRepository.findRoleByRoleState(RoleState.SUPER_ADMIN)
-                            .orElseGet(() -> {
-                                Role newRole = new Role();
-                                newRole.setRoleState(RoleState.SUPER_ADMIN);
-                                return roleRepository.save(newRole);
-                            });
+                            .orElseGet(() -> roleRepository.save(new Role(RoleState.SUPER_ADMIN)));
                     break;
                 case "user":
                 default:
                     role = roleRepository.findRoleByRoleState(RoleState.USER)
-                            .orElseGet(() -> {
-                                Role newRole = new Role();
-                                newRole.setRoleState(RoleState.USER);
-                                return roleRepository.save(newRole);
-                            });
-                    break;
+                            .orElseGet(() -> roleRepository.save(new Role(RoleState.USER)));
             }
-
             user.setSignupMethod("email");
         }
 
-        user.setRole(role); // Set single role
-        userRepository.save(user);
+        user.setRole(role);
+
+        // Call this to save both User and Student
+        userService.registerUser(user);
 
         return ResponseEntity.ok(new MessageResponse("success"));
     }

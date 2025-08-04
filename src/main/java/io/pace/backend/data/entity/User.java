@@ -47,6 +47,7 @@ public class User {
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Student student;
 
     public User(String userName, String email, String password) {

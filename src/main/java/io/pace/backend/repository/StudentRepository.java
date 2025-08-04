@@ -1,6 +1,7 @@
 package io.pace.backend.repository;
 
 import io.pace.backend.data.entity.Student;
+import io.pace.backend.domain.enums.AccountStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +12,7 @@ import java.util.Optional;
 public interface StudentRepository extends JpaRepository<Student, Long> {
     Optional<Student> findByEmail(String email);
 
-    List<Student> findByUserAccountStatus(int status); // 0 = pending, 1 = approved
+    List<Student> findByUserAccountStatus(AccountStatus accountStatus); // 0 = pending, 1 = approved
+
+    Optional<Student> findByEmailAndUserAccountStatus(String email, AccountStatus accountStatus);
 }
