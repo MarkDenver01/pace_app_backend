@@ -1,5 +1,6 @@
 package io.pace.backend.controller;
 
+import io.pace.backend.data.entity.Customization;
 import io.pace.backend.data.entity.Role;
 import io.pace.backend.data.entity.Student;
 import io.pace.backend.data.entity.User;
@@ -12,6 +13,7 @@ import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseRecommendationService;
 import io.pace.backend.service.course.CourseService;
+import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
 import io.pace.backend.service.user_login.UserService;
@@ -20,6 +22,7 @@ import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +34,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +74,14 @@ public class UserController {
 
     @Autowired
     private CourseRecommendationService courseRecommendationService;
+
+    @Autowired
+    CustomizationService customizationService;
+
+    @GetMapping("/public/get_themes")
+    public ResponseEntity<?> getCustomization() {
+        return ResponseEntity.ok(customizationService.getCustomization());
+    }
 
     @PostMapping("/public/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {

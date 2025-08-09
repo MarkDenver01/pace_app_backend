@@ -1,31 +1,37 @@
 package io.pace.backend.controller;
 
 
+import io.pace.backend.data.entity.Customization;
 import io.pace.backend.data.entity.Student;
 import io.pace.backend.domain.enums.AccountStatus;
+import io.pace.backend.domain.response.CustomizationResponse;
 import io.pace.backend.domain.response.MessageResponse;
 import io.pace.backend.domain.response.StudentListResponse;
 import io.pace.backend.domain.response.StudentResponse;
-import io.pace.backend.domain.response.UsernameResponse;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;
+import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping ("/admin")
+@CrossOrigin(origins = "*")
 public class AdminController {
     @Autowired
     JwtUtils jwtUtils;
@@ -44,6 +50,9 @@ public class AdminController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    CustomizationService customizationService;
 
     @Autowired
     CourseService courseService;
@@ -113,5 +122,23 @@ public class AdminController {
         Student student =  userService.approvedStudent(email, accountStatus);
         return ResponseEntity.ok(new MessageResponse("Student '"
                 + student.getEmail() + "' has been approved"));
+    }
+
+    @PostMapping(value = "/api/save_themes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateCustomization(
+            @RequestParam(value = "logo", required = false) MultipartFile logo,
+            @RequestParam("theme") String theme,
+            @RequestParam("aboutText") String aboutText
+    ) {
+        try {
+            CustomizationResponse updated = customizationService.updateCustomization(logo, theme, aboutText);
+            return ResponseEntity.ok(updated);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "File upload failed", "error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Error updating theme", "error", e.getMessage()));
+        }
     }
 }
