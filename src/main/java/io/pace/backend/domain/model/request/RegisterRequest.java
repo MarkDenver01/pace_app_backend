@@ -1,4 +1,4 @@
-package io.pace.backend.domain.request;
+package io.pace.backend.domain.model.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

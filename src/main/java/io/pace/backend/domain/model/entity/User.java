@@ -1,4 +1,4 @@
-package io.pace.backend.data.entity;
+package io.pace.backend.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

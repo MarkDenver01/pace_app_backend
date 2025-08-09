@@ -1,4 +1,4 @@
-package io.pace.backend.data.entity;
+package io.pace.backend.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -27,6 +27,10 @@ public class Course {
     @NotBlank(message = "Course description is required")
     @Column(name = "course_description", nullable = false)
     private String courseDescription;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id", nullable = false)
+    private University university;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("course")

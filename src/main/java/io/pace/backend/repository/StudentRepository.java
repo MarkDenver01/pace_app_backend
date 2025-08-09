@@ -1,7 +1,7 @@
 package io.pace.backend.repository;
 
-import io.pace.backend.data.entity.Student;
 import io.pace.backend.domain.enums.AccountStatus;
+import io.pace.backend.domain.model.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

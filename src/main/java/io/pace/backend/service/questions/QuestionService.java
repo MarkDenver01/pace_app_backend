@@ -1,7 +1,6 @@
 package io.pace.backend.service.questions;
 
-import io.pace.backend.data.entity.Questions;
-import io.pace.backend.domain.response.QuestionResponse;
+import io.pace.backend.domain.model.response.QuestionResponse;
 import io.pace.backend.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

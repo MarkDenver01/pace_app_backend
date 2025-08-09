@@ -1,6 +1,6 @@
 package io.pace.backend.utils;
 
-import io.pace.backend.data.entity.User;
+import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

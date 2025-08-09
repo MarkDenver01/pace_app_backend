@@ -1,12 +1,13 @@
 package io.pace.backend.service.user_login;
 
-import io.pace.backend.data.entity.PasswordResetToken;
-import io.pace.backend.data.entity.Role;
-import io.pace.backend.data.entity.Student;
-import io.pace.backend.data.entity.User;
-import io.pace.backend.data.state.RoleState;
+
+import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.UserDomainService;
 import io.pace.backend.domain.enums.AccountStatus;
+import io.pace.backend.domain.model.entity.PasswordResetToken;
+import io.pace.backend.domain.model.entity.Role;
+import io.pace.backend.domain.model.entity.Student;
+import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.repository.PasswordResetTokenRepository;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.StudentRepository;

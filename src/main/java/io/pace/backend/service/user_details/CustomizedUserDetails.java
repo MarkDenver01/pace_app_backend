@@ -1,7 +1,7 @@
 package io.pace.backend.service.user_details;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.pace.backend.data.entity.User;
+import io.pace.backend.domain.model.entity.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

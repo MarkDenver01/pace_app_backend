@@ -2,9 +2,9 @@ package io.pace.backend.config;
 
 import io.pace.backend.auth.AuthEntryPoint;
 import io.pace.backend.auth.AuthTokenFilter;
-import io.pace.backend.data.entity.Role;
-import io.pace.backend.data.entity.User;
-import io.pace.backend.data.state.RoleState;
+import io.pace.backend.domain.enums.RoleState;
+import io.pace.backend.domain.model.entity.Role;
+import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity

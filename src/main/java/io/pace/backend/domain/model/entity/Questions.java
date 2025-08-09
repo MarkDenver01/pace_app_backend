@@ -1,7 +1,7 @@
-package io.pace.backend.data.entity;
+package io.pace.backend.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.pace.backend.data.state.QuestionCategory;
+import io.pace.backend.domain.enums.QuestionCategory;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

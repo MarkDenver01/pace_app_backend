@@ -1,9 +1,9 @@
 package io.pace.backend.service.course;
 
-import io.pace.backend.data.entity.Course;
-import io.pace.backend.data.entity.Questions;
-import io.pace.backend.domain.request.AnsweredQuestionRequest;
-import io.pace.backend.domain.response.CourseMatchResponse;
+import io.pace.backend.domain.model.entity.Course;
+import io.pace.backend.domain.model.entity.Questions;
+import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
+import io.pace.backend.domain.model.response.CourseMatchResponse;
 import io.pace.backend.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,13 +1,12 @@
 package io.pace.backend.controller;
 
 
-import io.pace.backend.data.entity.Customization;
-import io.pace.backend.data.entity.Student;
 import io.pace.backend.domain.enums.AccountStatus;
-import io.pace.backend.domain.response.CustomizationResponse;
-import io.pace.backend.domain.response.MessageResponse;
-import io.pace.backend.domain.response.StudentListResponse;
-import io.pace.backend.domain.response.StudentResponse;
+import io.pace.backend.domain.model.entity.Student;
+import io.pace.backend.domain.model.response.CustomizationResponse;
+import io.pace.backend.domain.model.response.MessageResponse;
+import io.pace.backend.domain.model.response.StudentListResponse;
+import io.pace.backend.domain.model.response.StudentResponse;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;

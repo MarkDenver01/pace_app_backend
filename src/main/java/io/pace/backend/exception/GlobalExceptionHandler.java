@@ -1,6 +1,6 @@
 package io.pace.backend.exception;
 
-import io.pace.backend.domain.response.MessageResponse;
+import io.pace.backend.domain.model.response.MessageResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

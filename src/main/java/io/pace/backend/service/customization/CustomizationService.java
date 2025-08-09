@@ -1,10 +1,7 @@
 package io.pace.backend.service.customization;
 
-import io.pace.backend.data.entity.Customization;
-import io.pace.backend.data.entity.University;
-import io.pace.backend.domain.request.UniversityRequest;
-import io.pace.backend.domain.response.CustomizationResponse;
-import io.pace.backend.domain.response.UniversityResponse;
+import io.pace.backend.domain.model.entity.Customization;
+import io.pace.backend.domain.model.response.CustomizationResponse;
 import io.pace.backend.repository.CustomizationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

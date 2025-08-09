@@ -1,6 +1,6 @@
-    package io.pace.backend.data.entity;
+    package io.pace.backend.domain.model.entity;
 
-    import io.pace.backend.data.state.RoleState;
+    import io.pace.backend.domain.enums.RoleState;
     import jakarta.persistence.*;
     import lombok.AllArgsConstructor;
     import lombok.Data;

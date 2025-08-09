@@ -1,4 +1,4 @@
-package io.pace.backend.data.state;
+package io.pace.backend.domain.enums;
 
 public enum RoleState {
     USER,

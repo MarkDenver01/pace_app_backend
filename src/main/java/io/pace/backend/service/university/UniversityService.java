@@ -1,8 +1,8 @@
 package io.pace.backend.service.university;
 
-import io.pace.backend.data.entity.University;
-import io.pace.backend.domain.request.UniversityRequest;
-import io.pace.backend.domain.response.UniversityResponse;
+import io.pace.backend.domain.model.entity.University;
+import io.pace.backend.domain.model.request.UniversityRequest;
+import io.pace.backend.domain.model.response.UniversityResponse;
 import io.pace.backend.repository.UniversityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

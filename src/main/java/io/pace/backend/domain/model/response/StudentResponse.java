@@ -1,4 +1,4 @@
-package io.pace.backend.domain.response;
+package io.pace.backend.domain.model.response;
 
 import io.pace.backend.domain.enums.AccountStatus;
 import lombok.Getter;

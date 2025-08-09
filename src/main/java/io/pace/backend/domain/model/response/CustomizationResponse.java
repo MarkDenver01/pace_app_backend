@@ -1,4 +1,4 @@
-package io.pace.backend.domain.response;
+package io.pace.backend.domain.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

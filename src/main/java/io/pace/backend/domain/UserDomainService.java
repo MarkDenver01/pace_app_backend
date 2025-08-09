@@ -1,9 +1,9 @@
 package io.pace.backend.domain;
 
-import io.pace.backend.data.entity.Role;
-import io.pace.backend.data.entity.Student;
-import io.pace.backend.data.entity.User;
 import io.pace.backend.domain.enums.AccountStatus;
+import io.pace.backend.domain.model.entity.Role;
+import io.pace.backend.domain.model.entity.Student;
+import io.pace.backend.domain.model.entity.User;
 
 import java.util.List;
 import java.util.Optional;

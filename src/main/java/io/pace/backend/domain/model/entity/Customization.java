@@ -1,4 +1,4 @@
-package io.pace.backend.data.entity;
+package io.pace.backend.domain.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

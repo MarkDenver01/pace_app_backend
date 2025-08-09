@@ -1,9 +1,9 @@
 package io.pace.backend.config;
 
-import io.pace.backend.data.entity.Role;
-import io.pace.backend.data.entity.User;
-import io.pace.backend.data.state.RoleState;
+import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.UserDomainService;
+import io.pace.backend.domain.model.entity.Role;
+import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
 import io.pace.backend.service.user_login.UserService;
