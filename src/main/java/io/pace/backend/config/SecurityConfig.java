@@ -90,15 +90,15 @@ public class SecurityConfig {
                 userRepository.save(user);
             }
 
-            if (!userRepository.existsByEmail("pace@admin.com")) {
-                User user = new User(
-                        "Administrator",
-                        "pace@admin.com",
-                        passwordEncoder.encode("admin"));
-                user.setSignupMethod("email");
-                user.setRole(adminRole);
-                userRepository.save(user);
-            }
+//            if (!userRepository.existsByEmail("pace@admin.com")) {
+//                User user = new User(
+//                        "Administrator",
+//                        "pace@admin.com",
+//                        passwordEncoder.encode("admin"));
+//                user.setSignupMethod("email");
+//                user.setRole(adminRole);
+//                userRepository.save(user);
+//            }
         };
     }
 

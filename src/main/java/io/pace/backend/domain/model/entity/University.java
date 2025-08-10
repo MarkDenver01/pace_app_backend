@@ -25,5 +25,14 @@ public class University {
     private String universityName;
 
     @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<User> users = new ArrayList<>();
+
+    @OneToMany(mappedBy = "university", cascade = CascadeType.ALL)
+    private List<Student> students = new ArrayList<>();
+
+    @OneToMany(mappedBy = "university", cascade = CascadeType.ALL)
+    private List<Admin> admins = new ArrayList<>();
+
+    @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses = new ArrayList<>();
 }

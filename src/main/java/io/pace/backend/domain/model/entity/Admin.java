@@ -15,16 +15,15 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "student_request",
+@Table(name = "admin_request",
 uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email")
+@UniqueConstraint(columnNames = "email")
 })
-public class Student {
+public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "student_id")
-    private Long studentId;
-
+    @Column(name = "admin_id")
+    private Long adminId;
 
     @NotBlank
     @Size(max = 20)
@@ -37,13 +36,13 @@ public class Student {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "requested_date")
+    @Column(name = "created_date")
     @JsonFormat(
             shape = JsonFormat.Shape.STRING,
             pattern = "MMM dd, yyyy hh:mm a",
             timezone = "Asia/Manila" // or GMT+8
     )
-    private LocalDateTime requestedDate;
+    private LocalDateTime createdDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_account_status", length = 20)

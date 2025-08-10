@@ -1,6 +1,7 @@
 package io.pace.backend.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.pace.backend.domain.enums.RoleState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -50,6 +51,14 @@ public class User {
     @JsonIgnore
     private Student student;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Admin admin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id", referencedColumnName = "university_id")
+    private University university;
+
     public User(String userName, String email, String password) {
         this.userName = userName;
         this.email = email;
@@ -59,5 +68,12 @@ public class User {
     public User(String userName, String email) {
         this.userName = userName;
         this.email = email;
+    }
+
+    public void assignUniversity(University university) {
+        if (role != null && role.getRoleState() == RoleState.SUPER_ADMIN) {
+            throw new IllegalStateException("SUPER_ADMIN cannot be assigned to a University");
+        }
+        this.university = university;
     }
 }

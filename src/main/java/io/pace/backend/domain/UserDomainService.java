@@ -1,9 +1,7 @@
 package io.pace.backend.domain;
 
 import io.pace.backend.domain.enums.AccountStatus;
-import io.pace.backend.domain.model.entity.Role;
-import io.pace.backend.domain.model.entity.Student;
-import io.pace.backend.domain.model.entity.User;
+import io.pace.backend.domain.model.entity.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,5 +29,11 @@ public interface UserDomainService {
 
     List<Student> getAllStudents();
 
+    List<Admin> getAllAdmin();
+
     Student approvedStudent(String email, AccountStatus accountStatus);
+
+    boolean isUniversityExists(Long universityId);
+
+    boolean isExistByEmailAndUniversity(String email, Long universityId);
 }

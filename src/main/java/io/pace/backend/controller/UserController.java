@@ -2,17 +2,20 @@ package io.pace.backend.controller;
 
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.Role;
+import io.pace.backend.domain.model.entity.University;
 import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
 import io.pace.backend.domain.model.request.LoginRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
+import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseRecommendationService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.questions.QuestionService;
+import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
@@ -31,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,16 +54,22 @@ public class UserController {
     PasswordEncoder passwordEncoder;
 
     @Autowired
+    RoleRepository roleRepository;
+
+    @Autowired
     UserRepository userRepository;
 
     @Autowired
-    RoleRepository roleRepository;
+    UniversityRepository universityRepository;
 
     @Autowired
     UserService userService;
 
     @Autowired
     CourseService courseService;
+
+    @Autowired
+    UniversityService universityService;
 
     @Autowired
     AuthUtil authUtil;
@@ -118,6 +128,13 @@ public class UserController {
 
     @PostMapping("/public/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        // check if university is exist
+        University university = universityRepository.findById(Math.toIntExact(registerRequest.getUniversityId()))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "University not found"
+                ));
+
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ResponseEntity.badRequest().body(new MessageResponse("already exist"));
         }
@@ -126,6 +143,9 @@ public class UserController {
                 registerRequest.getUsername(),
                 registerRequest.getEmail(),
                 passwordEncoder.encode(registerRequest.getPassword()));
+
+        // Assign the university
+        user.setUniversity(university);
 
         Set<String> tempRoles = registerRequest.getRoles();
         Role role;

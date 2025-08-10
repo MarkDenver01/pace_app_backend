@@ -2,18 +2,25 @@ package io.pace.backend.controller;
 
 
 import io.pace.backend.domain.enums.AccountStatus;
+import io.pace.backend.domain.enums.RoleState;
+import io.pace.backend.domain.model.entity.Role;
 import io.pace.backend.domain.model.entity.Student;
+import io.pace.backend.domain.model.entity.University;
+import io.pace.backend.domain.model.entity.User;
+import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.response.CustomizationResponse;
 import io.pace.backend.domain.model.response.MessageResponse;
 import io.pace.backend.domain.model.response.StudentListResponse;
 import io.pace.backend.domain.model.response.StudentResponse;
 import io.pace.backend.repository.RoleRepository;
+import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -23,10 +30,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping ("/admin")
@@ -46,6 +55,9 @@ public class AdminController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    UniversityRepository universityRepository;
 
     @Autowired
     UserService userService;
@@ -69,7 +81,8 @@ public class AdminController {
                         student.getUserName(),
                         student.getEmail(),
                         student.getRequestedDate(),
-                        student.getUserAccountStatus()
+                        student.getUserAccountStatus(),
+                        student.getUniversity().getUniversityId()
                 ))
                 .toList();
 
@@ -89,7 +102,8 @@ public class AdminController {
                         student.getUserName(),
                         student.getEmail(),
                         student.getRequestedDate(),
-                        student.getUserAccountStatus()
+                        student.getUserAccountStatus(),
+                        student.getUniversity().getUniversityId()
                 ))
                 .toList();
 
@@ -109,7 +123,8 @@ public class AdminController {
                         student.getUserName(),
                         student.getEmail(),
                         student.getRequestedDate(),
-                        student.getUserAccountStatus()
+                        student.getUserAccountStatus(),
+                        student.getUniversity().getUniversityId()
                 ))
                 .toList();
         return ResponseEntity.ok(studentResponses);

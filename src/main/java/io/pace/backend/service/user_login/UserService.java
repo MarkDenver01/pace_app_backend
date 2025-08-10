@@ -4,16 +4,11 @@ package io.pace.backend.service.user_login;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.UserDomainService;
 import io.pace.backend.domain.enums.AccountStatus;
-import io.pace.backend.domain.model.entity.PasswordResetToken;
-import io.pace.backend.domain.model.entity.Role;
-import io.pace.backend.domain.model.entity.Student;
-import io.pace.backend.domain.model.entity.User;
-import io.pace.backend.repository.PasswordResetTokenRepository;
-import io.pace.backend.repository.RoleRepository;
-import io.pace.backend.repository.StudentRepository;
-import io.pace.backend.repository.UserRepository;
+import io.pace.backend.domain.model.entity.*;
+import io.pace.backend.repository.*;
 import io.pace.backend.service.email.EmailService;
 import jakarta.transaction.Transactional;
+import org.apache.http.HttpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -47,6 +42,12 @@ public class UserService implements UserDomainService {
 
     @Autowired
     StudentRepository studentRepository;
+
+    @Autowired
+    AdminRepository adminRepository;
+
+    @Autowired
+    UniversityRepository universityRepository;
 
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
@@ -131,29 +132,61 @@ public class UserService implements UserDomainService {
 
     @Override
     public void registerUser(User user) {
-        boolean isStudentExist = findByEmail(user.getEmail()).isPresent();
+        boolean isExists = userRepository.existsByEmailAndUniversity_UniversityId(
+                user.getEmail(),
+                user.getUniversity().getUniversityId()
+        );
 
-        if (isStudentExist) {
-            throw new RuntimeException("User already exists");
+        if (isExists) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User already exists"
+            );
         }
 
-        // encode the password
-        if (!isStringNullOrEmpty(user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // protect againts SUPER_ADMIN being assigned to a university
+        user.assignUniversity(user.getUniversity());
+
+        if (user.getRole() != null && user.getRole().getRoleState() == RoleState.USER) {
+            Student student = new Student();
+            student.setUserName(user.getUserName());
+            student.setEmail(user.getEmail());
+            student.setRequestedDate(LocalDateTime.now());
+            student.setUserAccountStatus(AccountStatus.PENDING); // pending
+            student.setUniversity(user.getUniversity());
+            student.setUser(user);
+
+            // encode the password
+            if (!isStringNullOrEmpty(user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+
+            // set student to user as well (bidirectional)
+            user.setStudent(student);
+
+            studentRepository.save(student);
+            userRepository.save(user);
+        } else {
+            Admin admin = new Admin();
+            admin.setUserName(user.getUserName());
+            admin.setEmail(user.getEmail());
+            admin.setCreatedDate(LocalDateTime.now());
+            admin.setUserAccountStatus(AccountStatus.PENDING); // pending
+            admin.setUniversity(user.getUniversity());
+            admin.setUser(user);
+
+            // encode the password
+            if (!isStringNullOrEmpty(user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+
+            // set student to user as well (bidirectional)
+            user.setAdmin(admin);
+
+            adminRepository.save(admin);
+            userRepository.save(user);
         }
 
-        Student student = new Student();
-        student.setUserName(user.getUserName());
-        student.setEmail(user.getEmail());
-        student.setRequestedDate(LocalDateTime.now());
-        student.setUserAccountStatus(AccountStatus.PENDING); // pending
-        student.setUser(user);
-
-        // set student to user as well (bidirectional)
-        user.setStudent(student);
-
-        studentRepository.save(student);
-        userRepository.save(user);
     }
 
     @Override
@@ -172,6 +205,11 @@ public class UserService implements UserDomainService {
     }
 
     @Override
+    public List<Admin> getAllAdmin() {
+        return adminRepository.findAll();
+    }
+
+    @Override
     public Student approvedStudent(String email, AccountStatus accountStatus) {
         Student student = studentRepository
                 .findByEmailAndUserAccountStatus(email, AccountStatus.PENDING)
@@ -179,5 +217,15 @@ public class UserService implements UserDomainService {
 
         student.setUserAccountStatus(accountStatus);
         return studentRepository.save(student);
+    }
+
+    @Override
+    public boolean isUniversityExists(Long universityId) {
+        return universityRepository.existsUniversityByUniversityId(universityId);
+    }
+
+    @Override
+    public boolean isExistByEmailAndUniversity(String email, Long universityId) {
+        return userRepository.existsByEmailAndUniversity_UniversityId(email, universityId);
     }
 }
