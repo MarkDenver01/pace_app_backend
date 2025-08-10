@@ -17,4 +17,13 @@ public class EmailService {
         message.setText("Reset your password here: " + resetUrl);
         mailSender.send(message);
     }
+
+    public void sendTemporaryPassword(String to, String tempPassword) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Your Temporary Account Password");
+        message.setText("Hello,\n\nYour temporary password is: " + tempPassword
+                + "\n\nPlease log in and change your password immediately.");
+        mailSender.send(message);
+    }
 }

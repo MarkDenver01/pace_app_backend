@@ -17,4 +17,5 @@ public class AdminResponse {
     private LocalDateTime createdAt;
     private AccountStatus accountStatus;
     private Long universityId;
+    private String universityName;
 }

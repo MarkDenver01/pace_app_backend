@@ -11,6 +11,7 @@ import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;
+import io.pace.backend.service.email.EmailService;
 import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_login.UserService;
 import jakarta.validation.Valid;
@@ -35,6 +36,9 @@ public class SuperAdminController {
 
     @Autowired
     CourseService courseService;
+
+    @Autowired
+    EmailService emailService;
 
     @Autowired
     UserService userService;
@@ -140,6 +144,10 @@ public class SuperAdminController {
             return ResponseEntity.badRequest().body(new MessageResponse("already exist"));
         }
 
+        emailService.sendTemporaryPassword(
+                registerRequest.getEmail(),
+                registerRequest.getPassword());
+
         User user = new User(
                 registerRequest.getUsername(),
                 registerRequest.getEmail(),
@@ -169,6 +177,7 @@ public class SuperAdminController {
                 default:
                     role = roleRepository.findRoleByRoleState(RoleState.USER)
                             .orElseGet(() -> roleRepository.save(new Role(RoleState.USER)));
+                    break;
             }
             user.setSignupMethod("email");
         }
@@ -186,13 +195,14 @@ public class SuperAdminController {
         List<Admin> admins = userService.getAllAdmin();
 
         List<AdminResponse> adminResponses = admins.stream()
-                .map(student -> new AdminResponse(
-                        student.getAdminId(),
-                        student.getUserName(),
-                        student.getEmail(),
-                        student.getCreatedDate(),
-                        student.getUserAccountStatus(),
-                        student.getUniversity().getUniversityId()
+                .map(admin -> new AdminResponse(
+                        admin.getAdminId(),
+                        admin.getUserName(),
+                        admin.getEmail(),
+                        admin.getCreatedDate(),
+                        admin.getUserAccountStatus(),
+                        admin.getUniversity().getUniversityId(),
+                        admin.getUniversity().getUniversityName()
                 ))
                 .toList();
         return ResponseEntity.ok(adminResponses);

@@ -147,44 +147,47 @@ public class UserService implements UserDomainService {
         // protect againts SUPER_ADMIN being assigned to a university
         user.assignUniversity(user.getUniversity());
 
-        if (user.getRole() != null && user.getRole().getRoleState() == RoleState.USER) {
-            Student student = new Student();
-            student.setUserName(user.getUserName());
-            student.setEmail(user.getEmail());
-            student.setRequestedDate(LocalDateTime.now());
-            student.setUserAccountStatus(AccountStatus.PENDING); // pending
-            student.setUniversity(user.getUniversity());
-            student.setUser(user);
+        if (user.getRole() != null) {
+            if ( user.getRole().getRoleState() == RoleState.USER) {
+                Student student = new Student();
+                student.setUserName(user.getUserName());
+                student.setEmail(user.getEmail());
+                student.setRequestedDate(LocalDateTime.now());
+                student.setUserAccountStatus(AccountStatus.PENDING); // pending
+                student.setUniversity(user.getUniversity());
+                student.setUser(user);
 
-            // encode the password
-            if (!isStringNullOrEmpty(user.getPassword())) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                // encode the password
+                if (!isStringNullOrEmpty(user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+                }
+
+                // set student to user as well (bidirectional)
+                user.setStudent(student);
+
+                studentRepository.save(student);
+                userRepository.save(user);
+            } else {
+                Admin admin = new Admin();
+                admin.setUserName(user.getUserName());
+                admin.setEmail(user.getEmail());
+                admin.setCreatedDate(LocalDateTime.now());
+                admin.setUserAccountStatus(AccountStatus.PENDING); // pending
+                admin.setUniversity(user.getUniversity());
+                admin.setUser(user);
+
+
+                // encode the password
+                if (!isStringNullOrEmpty(user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+                }
+
+                // set student to user as well (bidirectional)
+                user.setAdmin(admin);
+
+                adminRepository.save(admin);
+                userRepository.save(user);
             }
-
-            // set student to user as well (bidirectional)
-            user.setStudent(student);
-
-            studentRepository.save(student);
-            userRepository.save(user);
-        } else {
-            Admin admin = new Admin();
-            admin.setUserName(user.getUserName());
-            admin.setEmail(user.getEmail());
-            admin.setCreatedDate(LocalDateTime.now());
-            admin.setUserAccountStatus(AccountStatus.PENDING); // pending
-            admin.setUniversity(user.getUniversity());
-            admin.setUser(user);
-
-            // encode the password
-            if (!isStringNullOrEmpty(user.getPassword())) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-
-            // set student to user as well (bidirectional)
-            user.setAdmin(admin);
-
-            adminRepository.save(admin);
-            userRepository.save(user);
         }
 
     }
