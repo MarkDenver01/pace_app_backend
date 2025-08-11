@@ -208,6 +208,15 @@ public class SuperAdminController {
         return ResponseEntity.ok(adminResponses);
     }
 
+    @GetMapping("/api/course/count")
+    public ResponseEntity<Map<String, Long>> getCourseCount(
+            @RequestParam Long universityId,
+            @RequestParam(defaultValue = "Active") String status
+    ) {
+        long count = courseService.getCourseCountByUniversity(universityId, status);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
     // HANDLE VALIDATION ERRORS
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {

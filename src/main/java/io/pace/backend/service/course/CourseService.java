@@ -59,18 +59,35 @@ public class CourseService {
                 .map(c -> new CourseResponse(
                         c.getCourseName(),
                         c.getCourseDescription(),
-                        c.getStatus()
+                        c.getStatus(),
+                        universityId
                 ))
                 .collect(Collectors.toList());
     }
 
     public List<CourseResponse> getAllCourses() {
         return courseRepository.findAll().stream()
-                .map(c -> new CourseResponse(
-                        c.getCourseName(),
-                        c.getCourseDescription(),
-                        c.getStatus()
-                ))
+                .map(c -> {
+                    int max = 0;
+                    int assessed = 0;
+
+                    // count all students in the university as the course
+                    if (c.getUniversity() != null && c.getUniversity().getStudents() != null) {
+                        max = c.getUniversity().getStudents().size();
+                    }
+
+                    // no assessment logic yet, so return to 0
+                    assessed = 0;
+
+                    return new CourseResponse(
+                            c.getCourseName(),
+                            c.getCourseDescription(),
+                            c.getStatus(),
+                            c.getUniversity().getUniversityId(),
+                            max,
+                            assessed
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
@@ -87,7 +104,10 @@ public class CourseService {
         );
 
         Course saved = courseRepository.save(course);
-        return new CourseResponse(saved.getCourseName(), saved.getCourseDescription(), saved.getStatus());
+        return new CourseResponse(saved.getCourseName(), saved.getCourseDescription(), saved.getStatus(), university.getUniversityId());
     }
 
+    public long getCourseCountByUniversity(Long universityId, String status) {
+        return courseRepository.countByUniversity_UniversityIdAndStatus(universityId, status);
+    }
 }
