@@ -31,6 +31,10 @@ public interface UserDomainService {
 
     List<Admin> getAllAdmin();
 
+    Optional<Admin> findAdminByIdAndStatus(Long adminId, AccountStatus status);
+
+    Optional<Admin> findAdminById(Long adminId);
+
     Student approvedStudent(String email, AccountStatus accountStatus);
 
     boolean isUniversityExists(Long universityId);

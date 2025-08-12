@@ -130,6 +130,7 @@ public class UserService implements UserDomainService {
         return userRepository.findByEmail(email);
     }
 
+
     @Override
     public void registerUser(User user) {
         boolean isExists = userRepository.existsByEmailAndUniversity_UniversityId(
@@ -210,6 +211,16 @@ public class UserService implements UserDomainService {
     @Override
     public List<Admin> getAllAdmin() {
         return adminRepository.findAll();
+    }
+
+    @Override
+    public Optional<Admin> findAdminByIdAndStatus(Long adminId, AccountStatus status) {
+        return adminRepository.findByAdminIdAndUserAccountStatus(adminId, status);
+    }
+
+    @Override
+    public Optional<Admin> findAdminById(Long adminId) {
+        return adminRepository.findById(adminId);
     }
 
     @Override

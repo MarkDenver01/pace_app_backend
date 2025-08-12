@@ -6,14 +6,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseResponse {
+    private Long courseId;
     private String courseName;
     private String courseDescription;
     private String status;
     private Long universityId;
+    private String universityName;
     private int assessed;
     private int max;
 
-    public CourseResponse(String courseName, String courseDescription, String status, Long universityId) {
-        this(courseName, courseDescription, status, universityId, 0, 0);
+
+
+    public CourseResponse(Long courseId, String courseName, String courseDescription, String status, String universityName, Long universityId) {
+        this(courseId, courseName, courseDescription, status, universityId, universityName, 0, 0);
     }
 }

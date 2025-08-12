@@ -1,12 +1,14 @@
 package io.pace.backend.controller;
 
 
+import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.CourseRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.request.UniversityRequest;
 import io.pace.backend.domain.model.response.*;
+import io.pace.backend.repository.AdminRepository;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
@@ -23,10 +25,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/superadmin")
@@ -48,6 +47,9 @@ public class SuperAdminController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    AdminRepository adminRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -78,6 +80,14 @@ public class SuperAdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "An unexpected error occurred"));
         }
+    }
+
+    @PutMapping("/api/course/update/{id}")
+    public ResponseEntity<CourseResponse> updateCourse(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody CourseRequest request) {
+        CourseResponse updated = courseService.updateCourse(id, request);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/api/university/all")
@@ -188,6 +198,56 @@ public class SuperAdminController {
         userService.registerUser(user);
 
         return ResponseEntity.ok(new MessageResponse("success"));
+    }
+
+    @PutMapping("/admin_account/{id}/status")
+    public ResponseEntity<?> updateAccountStatus(@PathVariable Long id, @RequestParam String status) {
+
+
+        return adminRepository.findById(id)
+                .map(admin -> {
+                    try {
+                        AccountStatus newStatus = AccountStatus.valueOf(status.toUpperCase());
+                        admin.setUserAccountStatus(newStatus);
+                        adminRepository.save(admin);
+                        return ResponseEntity.ok("Account status updated to " + newStatus);
+                    } catch (IllegalArgumentException e) {
+                        return ResponseEntity.badRequest().body("Invalid status. Use ACTIVE or INACTIVE");
+                    }
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/api/admin_account/{id}/status")
+    public ResponseEntity<?> updateAdminStatus(@PathVariable Long id) {
+        Optional<Admin> admin = userService.findAdminById(id);
+
+        if (admin.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Admin account not found");
+        }
+
+        Admin request = admin.get();
+        AccountStatus currentStatus = request.getUserAccountStatus();
+
+        if (currentStatus == AccountStatus.VERIFIED || currentStatus == AccountStatus.ACTIVATE) {
+            request.setUserAccountStatus(AccountStatus.DEACTIVATE);
+        } else if (currentStatus == AccountStatus.DEACTIVATE) {
+            request.setUserAccountStatus(AccountStatus.ACTIVATE);
+        }
+
+        adminRepository.save(request);
+
+        return ResponseEntity.ok(new AdminResponse(
+                request.getAdminId(),
+                request.getUserName(),
+                request.getEmail(),
+                request.getCreatedDate(),
+                request.getUserAccountStatus(),
+                request.getUniversity().getUniversityId(),
+                request.getUniversity().getUniversityName()
+        ));
+
     }
 
     @GetMapping("/api/admin_account/list")
