@@ -130,4 +130,8 @@ public class CourseService {
     public long getCourseCountByUniversity(Long universityId, String status) {
         return courseRepository.countByUniversity_UniversityIdAndStatus(universityId, status);
     }
+
+    public List<Course> getActiveCoursesByUniversity(Long universityId) {
+        return courseRepository.findByUniversity_UniversityIdAndStatusIgnoreCase(universityId, "active");
+    }
 }

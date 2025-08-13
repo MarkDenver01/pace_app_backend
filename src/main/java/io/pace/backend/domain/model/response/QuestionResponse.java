@@ -12,4 +12,6 @@ public class QuestionResponse {
     private String question;
     private String category;
     private String courseName;
+    private String courseDescription;
+    private String universityName;
 }

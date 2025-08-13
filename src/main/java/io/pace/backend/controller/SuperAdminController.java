@@ -5,15 +5,14 @@ import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.CourseRequest;
+import io.pace.backend.domain.model.request.QuestionRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.request.UniversityRequest;
 import io.pace.backend.domain.model.response.*;
-import io.pace.backend.repository.AdminRepository;
-import io.pace.backend.repository.RoleRepository;
-import io.pace.backend.repository.UniversityRepository;
-import io.pace.backend.repository.UserRepository;
+import io.pace.backend.repository.*;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.email.EmailService;
+import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_login.UserService;
 import jakarta.validation.Valid;
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,6 +43,9 @@ public class SuperAdminController {
     UserService userService;
 
     @Autowired
+    QuestionService questionService;
+
+    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -50,6 +53,12 @@ public class SuperAdminController {
 
     @Autowired
     AdminRepository adminRepository;
+    
+    @Autowired
+    QuestionRepository questionRepository;
+
+    @Autowired
+    CourseRepository courseRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -275,6 +284,87 @@ public class SuperAdminController {
     ) {
         long count = courseService.getCourseCountByUniversity(universityId, status);
         return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @GetMapping("/api/questions/all")
+    public List<QuestionResponse> getAllQuestions() {
+        return questionService.getAllQuestions();
+    }
+
+    @GetMapping("/api/course/active")
+    public ResponseEntity<List<CourseResponse>> getActiveCoursesByUniversity(@RequestParam Long universityId) {
+        List<Course> activeCourses = courseService.getActiveCoursesByUniversity(universityId);
+
+        // Map to CourseResponse DTO
+        List<CourseResponse> courseResponses = activeCourses.stream()
+                .map(course -> new CourseResponse(
+                        course.getCourseId(),
+                        course.getCourseName(),
+                        course.getCourseDescription(),
+                        course.getStatus(),
+                        course.getUniversity().getUniversityName(),
+                        course.getUniversity().getUniversityId()
+                ))
+                .toList();
+        return ResponseEntity.ok(courseResponses);
+    }
+
+    @GetMapping("/api/questions/byCourse/{courseId}")
+    public List<QuestionResponse> getByCourse(@PathVariable Long courseId) {
+        return questionService.getQuestionsByCourse(courseId);
+    }
+
+    @GetMapping("/api/questions/byUniversity/{universityId}")
+    public List<QuestionResponse> getByUniversity(@PathVariable Long universityId) {
+        return questionService.getQuestionsByUniversity(universityId);
+    }
+
+    @PostMapping("/api/questions/save")
+    public ResponseEntity<?> saveQuestion(@Validated @RequestBody QuestionRequest request) {
+        try {
+            Questions saved = questionService.saveQuestion(request);
+            return ResponseEntity.ok("Question saved with ID: " + saved.getQuestionId());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save question");
+        }
+    }
+
+    @PutMapping("/api/questions/update/{id}")
+    public ResponseEntity<?> updateQuestion(
+            @PathVariable Long id,
+            @Valid @RequestBody QuestionRequest request
+    ) {
+        Optional<Questions> optionalQuestion = questionRepository.findById(id);
+        if (optionalQuestion.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Questions question = optionalQuestion.get();
+
+        var courseOpt = courseRepository.findById(request.getCourseId());
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid courseId");
+        }
+
+        question.setCourse(courseOpt.get());
+        question.setCategory(request.getCategory());
+        question.setQuestion(request.getQuestion());
+
+        questionRepository.save(question);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/api/questions/delete/{id}")
+    public ResponseEntity<?> deleteQuestion(@PathVariable Long id) {
+        if (!questionRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        questionRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     // HANDLE VALIDATION ERRORS
