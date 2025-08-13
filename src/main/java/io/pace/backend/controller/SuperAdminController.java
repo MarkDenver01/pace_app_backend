@@ -254,7 +254,8 @@ public class SuperAdminController {
                 request.getCreatedDate(),
                 request.getUserAccountStatus(),
                 request.getUniversity().getUniversityId(),
-                request.getUniversity().getUniversityName()
+                request.getUniversity().getUniversityName(),
+                request.getUser().getUserId()
         ));
 
     }
@@ -271,7 +272,8 @@ public class SuperAdminController {
                         admin.getCreatedDate(),
                         admin.getUserAccountStatus(),
                         admin.getUniversity().getUniversityId(),
-                        admin.getUniversity().getUniversityName()
+                        admin.getUniversity().getUniversityName(),
+                        admin.getUser().getUserId()
                 ))
                 .toList();
         return ResponseEntity.ok(adminResponses);

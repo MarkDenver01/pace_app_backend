@@ -18,4 +18,5 @@ public class AdminResponse {
     private AccountStatus accountStatus;
     private Long universityId;
     private String universityName;
+    private Long userId;
 }

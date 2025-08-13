@@ -8,7 +8,6 @@ import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.email.EmailService;
 import jakarta.transaction.Transactional;
-import org.apache.http.HttpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -78,14 +77,19 @@ public class UserService implements UserDomainService {
 
     @Override
     public void updatePassword(Long userId, String newPassword) {
-        try {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
-        } catch (Exception e) {
-            throw new RuntimeException( "Failed to update password");
-        }
+        // fetch user or throw
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // encode new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // update admin status if applicable
+        adminRepository.findByUser_UserId(user.getUserId()).ifPresent(admin -> {
+            admin.setUserAccountStatus(AccountStatus.VERIFIED);
+            adminRepository.save(admin);
+        });
     }
 
     @Override

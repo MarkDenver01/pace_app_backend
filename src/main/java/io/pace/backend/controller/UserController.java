@@ -87,6 +87,16 @@ public class UserController {
         return ResponseEntity.ok(customizationService.getCustomization());
     }
 
+    @PutMapping("/public/update-password/{id}")
+    public ResponseEntity<?> updatePassword(@PathVariable("id") Long id, @RequestParam String newPassword) {
+        try {
+            userService.updatePassword(id, newPassword);
+            return ResponseEntity.ok().body("success");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
     @PostMapping("/public/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Authentication authentication;
@@ -154,7 +164,8 @@ public class UserController {
                         user.getAdmin().getCreatedDate(),
                         user.getAdmin().getUserAccountStatus(),
                         user.getAdmin().getUniversity().getUniversityId(),
-                        user.getAdmin().getUniversity().getUniversityName()
+                        user.getAdmin().getUniversity().getUniversityName(),
+                        user.getUserId()
                 );
             }
 
