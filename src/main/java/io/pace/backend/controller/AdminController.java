@@ -82,7 +82,8 @@ public class AdminController {
                         student.getEmail(),
                         student.getRequestedDate(),
                         student.getUserAccountStatus(),
-                        student.getUniversity().getUniversityId()
+                        student.getUniversity().getUniversityId(),
+                        student.getUniversity().getUniversityName()
                 ))
                 .toList();
 
@@ -103,7 +104,8 @@ public class AdminController {
                         student.getEmail(),
                         student.getRequestedDate(),
                         student.getUserAccountStatus(),
-                        student.getUniversity().getUniversityId()
+                        student.getUniversity().getUniversityId(),
+                        student.getUniversity().getUniversityName()
                 ))
                 .toList();
 
@@ -124,7 +126,8 @@ public class AdminController {
                         student.getEmail(),
                         student.getRequestedDate(),
                         student.getUserAccountStatus(),
-                        student.getUniversity().getUniversityId()
+                        student.getUniversity().getUniversityId(),
+                        student.getUniversity().getUniversityName()
                 ))
                 .toList();
         return ResponseEntity.ok(studentResponses);

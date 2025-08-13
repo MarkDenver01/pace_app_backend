@@ -15,4 +15,5 @@ public class StudentResponse {
     private LocalDateTime requestedDate;
     private AccountStatus userAccountStatus;
     private Long universityId;
+    private String universityName;
 }

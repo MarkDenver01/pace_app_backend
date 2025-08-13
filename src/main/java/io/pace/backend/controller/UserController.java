@@ -21,6 +21,7 @@ import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +37,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -116,11 +115,53 @@ public class UserController {
                 .map(GrantedAuthority::getAuthority)
                 .findFirst().orElse(null);
 
-        // prepare the response body, now including the JWT token directly in the body
-        LoginResponse loginResponse = new LoginResponse(
-                customizedUserDetails.getUsername(),
-                role,
-                jwtToken);
+        Optional<User> optionalUser = userService.findByEmail(customizedUserDetails.getEmail());
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "User not found", "status", false));
+        }
+
+        User user= optionalUser.get();
+        LoginResponse loginResponse = null;
+
+        if ("USER".equals(role)) {
+            StudentResponse studentResponse = null;
+            if (user.getStudent() != null) {
+                studentResponse = new StudentResponse(
+                        user.getStudent().getStudentId(),
+                        user.getStudent().getUserName(),
+                        user.getStudent().getEmail(),
+                        user.getStudent().getRequestedDate(),
+                        user.getStudent().getUserAccountStatus(),
+                        user.getUniversity().getUniversityId(),
+                        user.getUniversity().getUniversityName()
+                );
+
+                loginResponse = new LoginResponse(
+                        jwtToken,
+                        user.getUserName(),
+                        role,
+                        studentResponse);
+            }
+        } else if ("ADMIN".equals(role)) {
+            AdminResponse adminResponse = null;
+            if (user.getAdmin() != null) {
+                adminResponse = new AdminResponse(
+                        user.getAdmin().getAdminId(),
+                        user.getAdmin().getUserName(),
+                        user.getAdmin().getEmail(),
+                        user.getAdmin().getCreatedDate(),
+                        user.getAdmin().getUserAccountStatus(),
+                        user.getAdmin().getUniversity().getUniversityId(),
+                        user.getAdmin().getUniversity().getUniversityName()
+                );
+            }
+
+            loginResponse = new LoginResponse(adminResponse, role, user.getUserName(), jwtToken);
+        } else {
+            loginResponse = new LoginResponse(jwtToken, user.getUserName(), role);
+        }
 
         // return the response entity with JWT token included in the response body
         return ResponseEntity.ok(loginResponse);
