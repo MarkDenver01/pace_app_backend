@@ -158,4 +158,13 @@ public class AdminController {
                     .body(Map.of("message", "Error updating theme", "error", e.getMessage()));
         }
     }
+
+    @GetMapping("/api/course/count/{id}")
+    public ResponseEntity<Map<String, Long>> getCourseCount(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "Active") String status
+    ) {
+        long count = courseService.getCourseCountByUniversity(id, status);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
 }
