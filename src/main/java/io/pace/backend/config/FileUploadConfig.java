@@ -1,0 +1,27 @@
+package io.pace.backend.config;
+
+import jakarta.annotation.PostConstruct;
+import lombok.Value;
+import org.springframework.context.annotation.Configuration;
+
+import java.io.File;
+
+@Configuration
+public class FileUploadConfig {
+
+    @Value("${app.upload.folder")
+    private String uploadFolder;
+
+    @PostConstruct
+    public void init() {
+        File folder = new File(uploadFolder);
+        if (!folder.exists()) {
+            folder.mkdirs();
+            System.out.println("Created upload folder: " + folder.getAbsolutePath());
+        }
+    }
+
+    public String getUploadFolder() {
+        return uploadFolder;
+    }
+}
