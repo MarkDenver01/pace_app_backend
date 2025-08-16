@@ -82,11 +82,6 @@ public class UserController {
     @Autowired
     CustomizationService customizationService;
 
-    @GetMapping("/public/get_themes")
-    public ResponseEntity<?> getCustomization() {
-        return ResponseEntity.ok(customizationService.getCustomization());
-    }
-
     @PutMapping("/public/update-password/{id}")
     public ResponseEntity<?> updatePassword(@PathVariable("id") Long id, @RequestParam String newPassword) {
         try {

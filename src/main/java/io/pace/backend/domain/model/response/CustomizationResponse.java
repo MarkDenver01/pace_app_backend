@@ -1,12 +1,12 @@
 package io.pace.backend.domain.model.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class CustomizationResponse {
-    private String themeName;
+    private Long id;
     private String logoUrl;
+    private String themeName;
     private String aboutText;
 }

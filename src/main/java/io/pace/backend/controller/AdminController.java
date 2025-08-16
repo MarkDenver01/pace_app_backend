@@ -4,6 +4,7 @@ package io.pace.backend.controller;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.*;
+import io.pace.backend.domain.model.request.CustomizationRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
@@ -130,27 +131,9 @@ public class AdminController {
     @PostMapping("/api/student_approve")
     public ResponseEntity<?> approveStudent(@RequestParam("email") String email,
                                             @RequestParam("user_account_status") AccountStatus accountStatus) {
-        Student student =  userService.approvedStudent(email, accountStatus);
+        Student student = userService.approvedStudent(email, accountStatus);
         return ResponseEntity.ok(new MessageResponse("Student '"
                 + student.getEmail() + "' has been approved"));
-    }
-
-    @PostMapping(value = "/api/save_themes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateCustomization(
-            @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam("theme") String theme,
-            @RequestParam("aboutText") String aboutText
-    ) {
-        try {
-            CustomizationResponse updated = customizationService.updateCustomization(logo, theme, aboutText);
-            return ResponseEntity.ok(updated);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "File upload failed", "error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Error updating theme", "error", e.getMessage()));
-        }
     }
 
     @GetMapping("/api/course/count/{id}")
@@ -214,4 +197,19 @@ public class AdminController {
         courseService.updateCourseStatus(courseId, "Inactive");
         return ResponseEntity.ok("Course deactivated");
     }
+
+    @PostMapping(path = "/api/customization/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CustomizationResponse> saveOrUpdateTheme(@ModelAttribute CustomizationRequest request) throws IOException {
+        CustomizationResponse response = customizationService.saveOrUpdateTheme(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/api/customization/get/{id}")
+    public ResponseEntity<CustomizationResponse> getTheme(@PathVariable Long id) {
+        CustomizationResponse response = customizationService.getTheme(id);
+        return ResponseEntity.ok(response);
+    }
 }
+
+
+
