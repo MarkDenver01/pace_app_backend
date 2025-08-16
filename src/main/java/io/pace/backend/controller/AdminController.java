@@ -3,15 +3,9 @@ package io.pace.backend.controller;
 
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
-import io.pace.backend.domain.model.entity.Role;
-import io.pace.backend.domain.model.entity.Student;
-import io.pace.backend.domain.model.entity.University;
-import io.pace.backend.domain.model.entity.User;
+import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.RegisterRequest;
-import io.pace.backend.domain.model.response.CustomizationResponse;
-import io.pace.backend.domain.model.response.MessageResponse;
-import io.pace.backend.domain.model.response.StudentListResponse;
-import io.pace.backend.domain.model.response.StudentResponse;
+import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
@@ -166,5 +160,58 @@ public class AdminController {
     ) {
         long count = courseService.getCourseCountByUniversity(id, status);
         return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @GetMapping("/api/course/all/active")
+    public ResponseEntity<List<CourseResponse>> getActiveCoursesByUniversity(@RequestParam Long universityId) {
+        List<Course> activeCourses = courseService.getActiveCoursesByUniversity(universityId);
+
+        // Map to CourseResponse DTO
+        List<CourseResponse> courseResponses = activeCourses.stream()
+                .map(course -> new CourseResponse(
+                        course.getCourseId(),
+                        course.getCourseName(),
+                        course.getCourseDescription(),
+                        course.getStatus(),
+                        course.getUniversity().getUniversityName(),
+                        course.getUniversity().getUniversityId()
+                ))
+                .toList();
+        return ResponseEntity.ok(courseResponses);
+    }
+
+    @GetMapping("/api/course/all/{universityId}")
+    public ResponseEntity<?> getAllCourses(@PathVariable Long universityId) {
+        try {
+            List<Course> courses = courseService.getAllCoursesByUniversity(universityId);
+
+            // Map to CourseResponse DTO
+            List<CourseResponse> courseResponses = courses.stream()
+                    .map(course -> new CourseResponse(
+                            course.getCourseId(),
+                            course.getCourseName(),
+                            course.getCourseDescription(),
+                            course.getStatus(),
+                            course.getUniversity().getUniversityName(),
+                            course.getUniversity().getUniversityId()
+                    ))
+                    .toList();
+            return ResponseEntity.ok(courseResponses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch course"));
+        }
+    }
+
+    @PutMapping("/api/course/{courseId}/activate")
+    public ResponseEntity<String> activateCourse(@PathVariable Long courseId) {
+        courseService.updateCourseStatus(courseId, "Active");
+        return ResponseEntity.ok("Course activated");
+    }
+
+    @PutMapping("/api/course/{courseId}/deactivate")
+    public ResponseEntity<String> deactivateCourse(@PathVariable Long courseId) {
+        courseService.updateCourseStatus(courseId, "Inactive");
+        return ResponseEntity.ok("Course deactivated");
     }
 }

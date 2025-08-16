@@ -132,6 +132,17 @@ public class CourseService {
     }
 
     public List<Course> getActiveCoursesByUniversity(Long universityId) {
-        return courseRepository.findByUniversity_UniversityIdAndStatusIgnoreCase(universityId, "active");
+        return courseRepository.findByUniversity_UniversityIdAndStatusIgnoreCase(universityId, "Active");
+    }
+
+    public List<Course> getAllCoursesByUniversity(Long universityId) {
+        return courseRepository.findByUniversity_UniversityId(universityId);
+    }
+
+    public void updateCourseStatus(Long courseId, String status) {
+        Course existingCourse = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found with ID: " + courseId));
+        existingCourse.setStatus(status);
+        courseRepository.save(existingCourse);
     }
 }
