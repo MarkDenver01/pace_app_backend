@@ -9,8 +9,7 @@ import java.io.File;
 @Configuration
 public class FileUploadConfig {
 
-    @Value("${app.upload.folder")
-    private String uploadFolder;
+    private final String uploadFolder = "uploads/folders/";
 
     @PostConstruct
     public void init() {
