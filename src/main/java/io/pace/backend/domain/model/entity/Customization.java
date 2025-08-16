@@ -1,5 +1,6 @@
 package io.pace.backend.domain.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,8 @@ import lombok.*;
 public class Customization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "customization_id")
+    private Long customizationId;
 
     @Column(name = "logo_url")
     private String logoUrl;
@@ -23,4 +25,8 @@ public class Customization {
 
     @Column(name = "about_text", length = 2000)
     private String aboutText;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id", nullable = false)
+    private University university;
 }

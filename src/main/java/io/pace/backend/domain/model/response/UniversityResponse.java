@@ -9,11 +9,4 @@ import lombok.*;
 public class UniversityResponse {
     private long universityId;
     private String universityName;
-
-    public UniversityResponse(University university) {
-        if (university != null) {
-            this.universityId = university.getUniversityId();
-            this.universityName = university.getUniversityName();
-        }
-    }
 }

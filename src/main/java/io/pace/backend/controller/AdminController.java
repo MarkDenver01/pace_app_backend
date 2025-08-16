@@ -204,11 +204,12 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/api/customization/get/{id}")
-    public ResponseEntity<CustomizationResponse> getTheme(@PathVariable Long id) {
-        CustomizationResponse response = customizationService.getTheme(id);
+    @GetMapping("/api/customization/{universityId}")
+    public ResponseEntity<CustomizationResponse> getTheme(@PathVariable Long universityId) {
+        CustomizationResponse response = customizationService.getTheme(universityId);
         return ResponseEntity.ok(response);
     }
+
 }
 
 
