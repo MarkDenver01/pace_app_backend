@@ -36,6 +36,9 @@ public class University {
     @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Questions> questions = new ArrayList<>();
+
     @OneToOne(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
     private Customization customization;
 }

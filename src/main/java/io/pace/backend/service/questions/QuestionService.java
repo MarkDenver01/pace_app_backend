@@ -2,10 +2,12 @@ package io.pace.backend.service.questions;
 
 import io.pace.backend.domain.model.entity.Course;
 import io.pace.backend.domain.model.entity.Questions;
+import io.pace.backend.domain.model.entity.University;
 import io.pace.backend.domain.model.request.QuestionRequest;
 import io.pace.backend.domain.model.response.QuestionResponse;
 import io.pace.backend.repository.CourseRepository;
 import io.pace.backend.repository.QuestionRepository;
+import io.pace.backend.repository.UniversityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class QuestionService {
     @Autowired
     CourseRepository courseRepository;
 
+    @Autowired
+    UniversityRepository universityRepository;
+
     public List<QuestionResponse> getAllQuestions() {
         return questionRepository.findAll().stream()
                 .map(q -> new QuestionResponse(
@@ -33,7 +38,8 @@ public class QuestionService {
                         q.getCategory().name(),
                         q.getCourse().getCourseName(),
                         q.getCourse().getCourseDescription(),
-                        q.getCourse().getUniversity().getUniversityName()  // get university name here
+                        q.getUniversity().getUniversityId(),
+                        q.getCourse().getUniversity().getUniversityName()
                 ))
                 .collect(Collectors.toList());
     }
@@ -46,6 +52,7 @@ public class QuestionService {
                         q.getCategory().name(),
                         q.getCourse().getCourseName(),
                         q.getCourse().getCourseDescription(),
+                        q.getUniversity().getUniversityId(),
                         q.getCourse().getUniversity().getUniversityName()
                 ))
                 .collect(Collectors.toList());
@@ -59,6 +66,7 @@ public class QuestionService {
                         q.getCategory().name(),
                         q.getCourse().getCourseName(),
                         q.getCourse().getCourseDescription(),
+                        q.getUniversity().getUniversityId(),
                         q.getCourse().getUniversity().getUniversityName()
                 ))
                 .collect(Collectors.toList());
@@ -71,10 +79,15 @@ public class QuestionService {
             throw new IllegalArgumentException("Invalid course ID");
         }
 
+        University university = universityRepository.findById(Math.toIntExact(request.getUniversityId()))
+                .orElseThrow(() -> new IllegalArgumentException("University not found with ID: " + request.getUniversityId()));
+
+
         Questions question = new Questions();
         question.setCourse(courseOpt.get());
         question.setCategory(request.getCategory());
         question.setQuestion(request.getQuestion());
+        question.setUniversity(university);
 
         return questionRepository.save(question);
     }
