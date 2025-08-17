@@ -176,6 +176,12 @@ public class UserController {
     @PostMapping("/public/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         // check if university is exist
+        System.out.println("university id: " + registerRequest.getUniversityId()
+        +", " + registerRequest.getEmail()
+        +", "+ registerRequest.getPassword()
+        +", " + registerRequest.getRoles()
+        +", " + registerRequest.getUsername());
+
         University university = universityRepository.findById(Math.toIntExact(registerRequest.getUniversityId()))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -266,5 +272,16 @@ public class UserController {
     public ResponseEntity<List<CourseMatchResponse>> getRecommendedCourse(@RequestBody List<AnsweredQuestionRequest> answers) {
         List<CourseMatchResponse> results = courseRecommendationService.getTopCourses(answers);
         return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/public/university/all")
+    public ResponseEntity<?> getAllUniversities() {
+        try {
+            List<UniversityResponse> universities = universityService.getAllUniversities();
+            return ResponseEntity.ok(universities);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch universities"));
+        }
     }
 }

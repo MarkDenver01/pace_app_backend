@@ -123,6 +123,7 @@ public class SecurityConfig {
                         .requestMatchers("/csrf_token").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/user/public/**").permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/user/api/**").authenticated()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/superadmin/**").hasAuthority("SUPER_ADMIN")
