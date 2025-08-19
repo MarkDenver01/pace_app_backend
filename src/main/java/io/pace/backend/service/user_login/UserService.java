@@ -164,7 +164,7 @@ public class UserService implements UserDomainService {
 
                 // encode the password
                 if (!isStringNullOrEmpty(user.getPassword())) {
-                    user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    user.setPassword(user.getPassword());
                 }
 
                 // set student to user as well (bidirectional)
@@ -246,4 +246,6 @@ public class UserService implements UserDomainService {
     public boolean isExistByEmailAndUniversity(String email, Long universityId) {
         return userRepository.existsByEmailAndUniversity_UniversityId(email, universityId);
     }
+
+
 }

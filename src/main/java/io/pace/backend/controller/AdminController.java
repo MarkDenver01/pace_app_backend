@@ -12,6 +12,7 @@ import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.customization.CustomizationService;
+import io.pace.backend.service.email.EmailService;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
@@ -62,6 +63,9 @@ public class AdminController {
 
     @Autowired
     CourseService courseService;
+
+    @Autowired
+    EmailService emailService;
 
     @Autowired
     AuthUtil authUtil;
@@ -132,6 +136,12 @@ public class AdminController {
     public ResponseEntity<?> approveStudent(@RequestParam("email") String email,
                                             @RequestParam("user_account_status") AccountStatus accountStatus) {
         Student student = userService.approvedStudent(email, accountStatus);
+
+        // send an email for indication or reminder that the account has been verified
+        emailService.sendEmail(
+                email,
+                student.getUserName());
+
         return ResponseEntity.ok(new MessageResponse("Student '"
                 + student.getEmail() + "' has been approved"));
     }

@@ -1,7 +1,11 @@
 package io.pace.backend.controller;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.Role;
+import io.pace.backend.domain.model.entity.Student;
 import io.pace.backend.domain.model.entity.University;
 import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
@@ -9,6 +13,7 @@ import io.pace.backend.domain.model.request.LoginRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
+import io.pace.backend.repository.StudentRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseRecommendationService;
@@ -18,6 +23,7 @@ import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
 import io.pace.backend.service.user_login.UserService;
+import io.pace.backend.service.user_login.google.GoogleTokenVerifierService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
@@ -36,8 +42,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.URI;
+import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
 import java.util.*;
+
+import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
 
 @Slf4j
 @RestController
@@ -57,6 +70,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+    
+    @Autowired
+    StudentRepository studentRepository;
 
     @Autowired
     UniversityRepository universityRepository;
@@ -82,6 +98,9 @@ public class UserController {
     @Autowired
     CustomizationService customizationService;
 
+    @Autowired
+    GoogleTokenVerifierService  googleTokenVerifierService;
+
     @PutMapping("/public/update-password/{id}")
     public ResponseEntity<?> updatePassword(@PathVariable("id") Long id, @RequestParam String newPassword) {
         try {
@@ -90,6 +109,68 @@ public class UserController {
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
+    }
+
+    @PostMapping("/public/google_login")
+    public ResponseEntity<?> googleLogin(
+            @RequestParam("idToken") String idToken,
+            @RequestParam("universityId") Long universityId) throws Exception {
+        GoogleIdToken.Payload payload = googleTokenVerifierService.verify(idToken);
+
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+
+        // get deault role for student
+        Role defaultRole = roleRepository.findRoleByRoleState(RoleState.USER)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+
+        // get university from login
+        University university = universityRepository.findById(Math.toIntExact(universityId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setUserName(name);
+            newUser.setRole(defaultRole);
+            newUser.setSignupMethod("google");
+            newUser.setUniversity(university);
+            return userRepository.save(newUser);
+        });
+
+        Student student = studentRepository.findByEmail(email).orElseGet(() -> {
+            Student newStudent = new Student();
+            newStudent.setUserName(user.getUserName());
+            newStudent.setEmail(user.getEmail());
+            newStudent.setRequestedDate(LocalDateTime.now());
+            newStudent.setUserAccountStatus(AccountStatus.PENDING); // pending
+            newStudent.setUniversity(user.getUniversity());
+            newStudent.setUser(user);
+            return studentRepository.save(newStudent);
+        });
+
+        // generate jwt token
+        String jwtToken = jwtUtils.generateToken(email, defaultRole.getRoleState().name());
+
+        //student reponse
+      StudentResponse  studentResponse = new StudentResponse(
+                user.getStudent().getStudentId(),
+                user.getStudent().getUserName(),
+                user.getStudent().getEmail(),
+                user.getStudent().getRequestedDate(),
+                user.getStudent().getUserAccountStatus(),
+                user.getUniversity().getUniversityId(),
+                user.getUniversity().getUniversityName()
+        );
+
+        // login response
+        LoginResponse loginResponse = new LoginResponse(
+                jwtToken,
+                user.getUserName(),
+                defaultRole.getRoleState().name(),
+                studentResponse);
+
+        return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/public/login")
@@ -175,13 +256,6 @@ public class UserController {
 
     @PostMapping("/public/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        // check if university is exist
-        System.out.println("university id: " + registerRequest.getUniversityId()
-        +", " + registerRequest.getEmail()
-        +", "+ registerRequest.getPassword()
-        +", " + registerRequest.getRoles()
-        +", " + registerRequest.getUsername());
-
         University university = universityRepository.findById(Math.toIntExact(registerRequest.getUniversityId()))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,

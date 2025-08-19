@@ -1,9 +1,6 @@
 package io.pace.backend.utils;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
@@ -17,6 +14,8 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
@@ -30,6 +29,8 @@ public class JwtUtils {
 
     @Value("${spring.app.jwtExpirationMs}")
     private int expirationMs;
+
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String getBearerToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
@@ -50,6 +51,16 @@ public class JwtUtils {
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + expirationMs))
                 .signWith(getSecretKeyProvider())
+                .compact();
+    }
+
+    public String generateToken(String email, String role) {
+        return Jwts.builder()
+                .subject(email)
+                .claim("roles", role)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + expirationMs))
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 

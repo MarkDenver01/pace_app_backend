@@ -26,4 +26,12 @@ public class EmailService {
                 + "\n\nPlease log in and change your password immediately.");
         mailSender.send(message);
     }
+
+    public void sendEmail(String to, String userName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("[PACE] ACCOUNT VERIFIED");
+        message.setText("Hello " + userName + ", \n\nYour account has been verified.\n" +
+                "You can have now the rights to logged in.");
+    }
 }
