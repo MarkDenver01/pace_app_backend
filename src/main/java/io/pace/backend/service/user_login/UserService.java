@@ -247,5 +247,10 @@ public class UserService implements UserDomainService {
         return userRepository.existsByEmailAndUniversity_UniversityId(email, universityId);
     }
 
+    @Override
+    public boolean isGoogleAccountExists(String email) {
+        return userRepository.existsByEmailAndSignupMethod(email, "google");
+    }
+
 
 }

@@ -29,6 +29,7 @@ import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -111,66 +112,91 @@ public class UserController {
         }
     }
 
+    @GetMapping("/public/user/google_account")
+    public ResponseEntity<?> getGoogleAccount(@RequestParam("email") String email) {
+        return ResponseEntity.ok(userService.isGoogleAccountExists(email));
+    }
+
     @PostMapping("/public/google_login")
     public ResponseEntity<?> googleLogin(
             @RequestParam("idToken") String idToken,
             @RequestParam("universityId") Long universityId) throws Exception {
+        // verify the google id token
         GoogleIdToken.Payload payload = googleTokenVerifierService.verify(idToken);
-
         String email = payload.getEmail();
         String name = (String) payload.get("name");
 
-        // get deault role for student
+        // retrieve necessary entities from database
         Role defaultRole = roleRepository.findRoleByRoleState(RoleState.USER)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
 
-        // get university from login
         University university = universityRepository.findById(Math.toIntExact(universityId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setUserName(name);
-            newUser.setRole(defaultRole);
-            newUser.setSignupMethod("google");
-            newUser.setUniversity(university);
-            return userRepository.save(newUser);
-        });
+        // Handle user and student existence logic
+        Optional<User> existingUserOptional = userRepository.findByEmail(email);
+        boolean isNewUser = existingUserOptional.isEmpty();
 
-        Student student = studentRepository.findByEmail(email).orElseGet(() -> {
-            Student newStudent = new Student();
-            newStudent.setUserName(user.getUserName());
-            newStudent.setEmail(user.getEmail());
-            newStudent.setRequestedDate(LocalDateTime.now());
-            newStudent.setUserAccountStatus(AccountStatus.PENDING); // pending
-            newStudent.setUniversity(user.getUniversity());
-            newStudent.setUser(user);
-            return studentRepository.save(newStudent);
-        });
+        User user;
+        Student student;
 
-        // generate jwt token
+        if (isNewUser) {
+            // create and save new user and student
+            user = new User();
+            user.setEmail(email);
+            user.setUserName(name);
+            user.setRole(defaultRole);
+            user.setSignupMethod("google");
+            user.setUniversity(university);
+            user = userRepository.save(user);
+
+            student = new Student();
+            student.setUserName(user.getUserName());
+            student.setEmail(user.getEmail());
+            student.setRequestedDate(LocalDateTime.now());
+            student.setUserAccountStatus(AccountStatus.PENDING);
+            student.setUniversity(user.getUniversity());
+            student.setUser(user);
+            student = studentRepository.save(student);
+        } else {
+            // update existing User and Student
+            user = existingUserOptional.get();
+            user.setUniversity(university); // Update university if needed
+            user = userRepository.save(user);
+
+            student = studentRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.INTERNAL_SERVER_ERROR, "Student not found for existing user."));
+
+            student.setUniversity(user.getUniversity());
+            student = studentRepository.save(student);
+        }
+
+        // generate JWT token and create response objects
         String jwtToken = jwtUtils.generateToken(email, defaultRole.getRoleState().name());
 
-        //student reponse
-      StudentResponse  studentResponse = new StudentResponse(
-                user.getStudent().getStudentId(),
-                user.getStudent().getUserName(),
-                user.getStudent().getEmail(),
-                user.getStudent().getRequestedDate(),
-                user.getStudent().getUserAccountStatus(),
-                user.getUniversity().getUniversityId(),
-                user.getUniversity().getUniversityName()
+        StudentResponse studentResponse = new StudentResponse(
+                student.getStudentId(),
+                student.getUserName(),
+                student.getEmail(),
+                student.getRequestedDate(),
+                student.getUserAccountStatus(),
+                student.getUniversity().getUniversityId(),
+                student.getUniversity().getUniversityName()
         );
 
-        // login response
         LoginResponse loginResponse = new LoginResponse(
                 jwtToken,
                 user.getUserName(),
                 defaultRole.getRoleState().name(),
                 studentResponse);
 
-        return ResponseEntity.ok(loginResponse);
+        // Return the appropriate HTTP status code
+        if (isNewUser) {
+            return new ResponseEntity<>(loginResponse, HttpStatus.CREATED); // 201
+        } else {
+            return ResponseEntity.ok(loginResponse); // 200
+        }
     }
 
     @PostMapping("/public/login")
