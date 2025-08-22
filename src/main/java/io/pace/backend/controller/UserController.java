@@ -112,7 +112,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/public/user/google_account")
+    @GetMapping("/public/check/google_account")
     public ResponseEntity<?> getGoogleAccount(@RequestParam("email") String email) {
         return ResponseEntity.ok(userService.isGoogleAccountExists(email));
     }
@@ -120,7 +120,7 @@ public class UserController {
     @PostMapping("/public/google_login")
     public ResponseEntity<?> googleLogin(
             @RequestParam("idToken") String idToken,
-            @RequestParam("universityId") Long universityId) throws Exception {
+            @RequestParam(value = "universityId", required = false) Long universityId) throws Exception {
         // verify the google id token
         GoogleIdToken.Payload payload = googleTokenVerifierService.verify(idToken);
         String email = payload.getEmail();
@@ -130,9 +130,6 @@ public class UserController {
         Role defaultRole = roleRepository.findRoleByRoleState(RoleState.USER)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
 
-        University university = universityRepository.findById(Math.toIntExact(universityId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
-
         // Handle user and student existence logic
         Optional<User> existingUserOptional = userRepository.findByEmail(email);
         boolean isNewUser = existingUserOptional.isEmpty();
@@ -141,6 +138,14 @@ public class UserController {
         Student student;
 
         if (isNewUser) {
+            if (universityId == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "University is required for new users");
+            }
+
+            University university = universityRepository.findById(Math.toIntExact(universityId))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
+
+
             // create and save new user and student
             user = new User();
             user.setEmail(email);
@@ -161,15 +166,24 @@ public class UserController {
         } else {
             // update existing User and Student
             user = existingUserOptional.get();
-            user.setUniversity(university); // Update university if needed
-            user = userRepository.save(user);
 
-            student = studentRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.INTERNAL_SERVER_ERROR, "Student not found for existing user."));
+            if (universityId != null) {
+                University university = universityRepository.findById(Math.toIntExact(universityId))
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
 
-            student.setUniversity(user.getUniversity());
-            student = studentRepository.save(student);
+                user.setUniversity(university);
+                user = userRepository.save(user);
+
+                student = studentRepository.findByEmail(email)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.INTERNAL_SERVER_ERROR, "Student not found for existing user."));
+                student.setUniversity(university);
+                student = studentRepository.save(student);
+            } else {
+                student = studentRepository.findByEmail(email)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.INTERNAL_SERVER_ERROR, "Student not found for existing user."));
+            }
         }
 
         // generate JWT token and create response objects
@@ -192,11 +206,7 @@ public class UserController {
                 studentResponse);
 
         // Return the appropriate HTTP status code
-        if (isNewUser) {
-            return new ResponseEntity<>(loginResponse, HttpStatus.CREATED); // 201
-        } else {
-            return ResponseEntity.ok(loginResponse); // 200
-        }
+        return new ResponseEntity<>(loginResponse, isNewUser ? HttpStatus.CREATED : HttpStatus.OK);
     }
 
     @PostMapping("/public/login")
