@@ -42,4 +42,6 @@ public interface UserDomainService {
     boolean isExistByEmailAndUniversity(String email, Long universityId);
 
     boolean isGoogleAccountExists(String email);
+
+    boolean isFacebookAccountExists(String email);
 }

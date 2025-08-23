@@ -1,7 +1,7 @@
 package io.pace.backend.controller;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import io.pace.backend.config.FacebookConfig;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.Role;
@@ -22,14 +22,17 @@ import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
+import io.pace.backend.service.user_login.SocialLoginService;
 import io.pace.backend.service.user_login.UserService;
-import io.pace.backend.service.user_login.google.GoogleTokenVerifierService;
+import io.pace.backend.service.user_login.facebook.FacebookAuthService;
+import io.pace.backend.service.user_login.google.GoogleAuthService;
+import io.pace.backend.service.user_login.instagram.InstagramAuthService;
+import io.pace.backend.service.user_login.twitter.TwitterAuthService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,16 +45,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.URI;
-import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.*;
-
-import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
 
 @Slf4j
 @RestController
@@ -100,7 +98,19 @@ public class UserController {
     CustomizationService customizationService;
 
     @Autowired
-    GoogleTokenVerifierService  googleTokenVerifierService;
+    GoogleAuthService googleAuthService;
+
+    @Autowired
+    FacebookAuthService facebookAuthService;
+
+    @Autowired
+    InstagramAuthService instagramAuthService;
+
+    @Autowired
+    TwitterAuthService twitterAuthService;
+
+    @Autowired
+    SocialLoginService socialLoginService;
 
     @PutMapping("/public/update-password/{id}")
     public ResponseEntity<?> updatePassword(@PathVariable("id") Long id, @RequestParam String newPassword) {
@@ -112,101 +122,82 @@ public class UserController {
         }
     }
 
+    @GetMapping("/public/check/facebook_account")
+    public ResponseEntity<?> getFacebookAccount(@RequestParam("accessToken") String accessToken) {
+        // get email
+        Map<String, Object> userResponse = facebookAuthService.verifyAccessToken(accessToken);
+        String email = (String) userResponse.get("email");
+
+        if (email == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Facebook account did not return email");
+        }
+
+        return ResponseEntity.ok(userService.isFacebookAccountExists(email));
+    }
+
     @GetMapping("/public/check/google_account")
     public ResponseEntity<?> getGoogleAccount(@RequestParam("email") String email) {
         return ResponseEntity.ok(userService.isGoogleAccountExists(email));
+    }
+
+    @PostMapping("/public/twitter_login")
+    public ResponseEntity<?> twitterLogin(
+            @RequestParam("accessToken") String accessToken,
+            @RequestParam(value = "universityId", required = false) Long universityId
+    ) {
+        Map<String, Object> userResponse = twitterAuthService.verifyAccessToken(accessToken);
+        String email = (String) userResponse.get("email");
+        String name = (String) userResponse.get("name");
+
+        LoginResponse loginResponse = socialLoginService.handleLogin(email, name, "twitter", universityId);
+        return new ResponseEntity<>(loginResponse,
+                userRepository.findByEmail(email).isEmpty() ? HttpStatus.CREATED : HttpStatus.OK);
+    }
+
+    @PostMapping("/public/instagram_login")
+    public ResponseEntity<?> instagramLogin(
+            @RequestParam("accessToken") String accessToken,
+            @RequestParam(value = "universityId", required = false) Long universityId
+    ) {
+        Map<String, Object> userResponse = instagramAuthService.verifyAccessToken(accessToken);
+        String email = (String) userResponse.get("email");
+        String name = (String) userResponse.get("name");
+
+        LoginResponse loginResponse = socialLoginService.handleLogin(email, name, "instagram", universityId);
+        return new ResponseEntity<>(loginResponse,
+                userRepository.findByEmail(email).isEmpty() ? HttpStatus.CREATED : HttpStatus.OK);
+    }
+
+    @PostMapping("/public/facebook_login")
+    public ResponseEntity<?> facebookLogin(
+            @RequestParam("accessToken") String accessToken,
+            @RequestParam(value = "universityId", required = false) Long universityId
+    ) {
+        Map<String, Object> userResponse = facebookAuthService.verifyAccessToken(accessToken);
+        String email = (String) userResponse.get("email");
+        String name = (String) userResponse.get("name");
+
+        if (email == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Facebook account did not return email");
+        }
+
+        LoginResponse loginResponse = socialLoginService.handleLogin(email, name, "facebook", universityId);
+        return new ResponseEntity<>(loginResponse,
+                userRepository.findByEmail(email).isEmpty() ? HttpStatus.CREATED : HttpStatus.OK);
     }
 
     @PostMapping("/public/google_login")
     public ResponseEntity<?> googleLogin(
             @RequestParam("idToken") String idToken,
             @RequestParam(value = "universityId", required = false) Long universityId) throws Exception {
-        // verify the google id token
-        GoogleIdToken.Payload payload = googleTokenVerifierService.verify(idToken);
+
+        GoogleIdToken.Payload payload = googleAuthService.verify(idToken);
         String email = payload.getEmail();
         String name = (String) payload.get("name");
 
-        // retrieve necessary entities from database
-        Role defaultRole = roleRepository.findRoleByRoleState(RoleState.USER)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
-
-        // Handle user and student existence logic
-        Optional<User> existingUserOptional = userRepository.findByEmail(email);
-        boolean isNewUser = existingUserOptional.isEmpty();
-
-        User user;
-        Student student;
-
-        if (isNewUser) {
-            if (universityId == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "University is required for new users");
-            }
-
-            University university = universityRepository.findById(Math.toIntExact(universityId))
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
-
-
-            // create and save new user and student
-            user = new User();
-            user.setEmail(email);
-            user.setUserName(name);
-            user.setRole(defaultRole);
-            user.setSignupMethod("google");
-            user.setUniversity(university);
-            user = userRepository.save(user);
-
-            student = new Student();
-            student.setUserName(user.getUserName());
-            student.setEmail(user.getEmail());
-            student.setRequestedDate(LocalDateTime.now());
-            student.setUserAccountStatus(AccountStatus.PENDING);
-            student.setUniversity(user.getUniversity());
-            student.setUser(user);
-            student = studentRepository.save(student);
-        } else {
-            // update existing User and Student
-            user = existingUserOptional.get();
-
-            if (universityId != null) {
-                University university = universityRepository.findById(Math.toIntExact(universityId))
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid University"));
-
-                user.setUniversity(university);
-                user = userRepository.save(user);
-
-                student = studentRepository.findByEmail(email)
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.INTERNAL_SERVER_ERROR, "Student not found for existing user."));
-                student.setUniversity(university);
-                student = studentRepository.save(student);
-            } else {
-                student = studentRepository.findByEmail(email)
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.INTERNAL_SERVER_ERROR, "Student not found for existing user."));
-            }
-        }
-
-        // generate JWT token and create response objects
-        String jwtToken = jwtUtils.generateToken(email, defaultRole.getRoleState().name());
-
-        StudentResponse studentResponse = new StudentResponse(
-                student.getStudentId(),
-                student.getUserName(),
-                student.getEmail(),
-                student.getRequestedDate(),
-                student.getUserAccountStatus(),
-                student.getUniversity().getUniversityId(),
-                student.getUniversity().getUniversityName()
-        );
-
-        LoginResponse loginResponse = new LoginResponse(
-                jwtToken,
-                user.getUserName(),
-                defaultRole.getRoleState().name(),
-                studentResponse);
-
-        // Return the appropriate HTTP status code
-        return new ResponseEntity<>(loginResponse, isNewUser ? HttpStatus.CREATED : HttpStatus.OK);
+        LoginResponse loginResponse = socialLoginService.handleLogin(email, name, "google", universityId);
+        return new ResponseEntity<>(loginResponse,
+                userRepository.findByEmail(email).isEmpty() ? HttpStatus.CREATED : HttpStatus.OK);
     }
 
     @PostMapping("/public/login")

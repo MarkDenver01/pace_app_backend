@@ -252,5 +252,10 @@ public class UserService implements UserDomainService {
         return userRepository.existsByEmailAndSignupMethod(email, "google");
     }
 
+    @Override
+    public boolean isFacebookAccountExists(String email) {
+        return userRepository.existsByEmailAndSignupMethod(email, "facebook");
+    }
+
 
 }
