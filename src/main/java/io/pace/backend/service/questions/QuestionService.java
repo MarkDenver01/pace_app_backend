@@ -72,6 +72,20 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
+    public List<QuestionResponse> getAllQuestionsByUniversity(Long universityId) {
+        return questionRepository.findAllByUniversity_UniversityId(universityId).stream()
+                .map(q -> new QuestionResponse(
+                        q.getQuestionId(),
+                        q.getQuestion(),
+                        q.getCategory().name(),
+                        q.getCourse().getCourseName(),
+                        q.getCourse().getCourseDescription(),
+                        q.getUniversity().getUniversityId(),
+                        q.getCourse().getUniversity().getUniversityName()
+                ))
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public Questions saveQuestion(QuestionRequest request) {
         Optional<Course> courseOpt = courseRepository.findById(request.getCourseId());

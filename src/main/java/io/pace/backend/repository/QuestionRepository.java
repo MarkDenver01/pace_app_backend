@@ -11,4 +11,6 @@ public interface QuestionRepository extends JpaRepository<Questions, Long> {
     List<Questions> findByCourse_CourseId(Long courseId);
 
     List<Questions> findByCourse_University_UniversityId(Long universityId);
+
+    List<Questions> findAllByUniversity_UniversityId(Long universityId);
 }
