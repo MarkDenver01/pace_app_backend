@@ -146,18 +146,15 @@ public class AdminController {
                 + student.getEmail() + "' has been approved"));
     }
 
-    @GetMapping("/api/course/count/{id}")
-    public ResponseEntity<Map<String, Long>> getCourseCount(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "Active") String status
-    ) {
-        long count = courseService.getCourseCountByUniversity(id, status);
+    @GetMapping("/api/course/count")
+    public ResponseEntity<Map<String, Long>> getCourseCount(@RequestParam(defaultValue = "Active") String status) {
+        long count = courseService.getCourseCount(status);
         return ResponseEntity.ok(Map.of("count", count));
     }
 
     @GetMapping("/api/course/all/active")
-    public ResponseEntity<List<CourseResponse>> getActiveCoursesByUniversity(@RequestParam Long universityId) {
-        List<Course> activeCourses = courseService.getActiveCoursesByUniversity(universityId);
+    public ResponseEntity<List<CourseResponse>> getActiveCoursesByUniversity() {
+        List<Course> activeCourses = courseService.getAllActiveCourses("Active");
 
         // Map to CourseResponse DTO
         List<CourseResponse> courseResponses = activeCourses.stream()
@@ -165,47 +162,28 @@ public class AdminController {
                         course.getCourseId(),
                         course.getCourseName(),
                         course.getCourseDescription(),
-                        course.getStatus(),
-                        course.getUniversity().getUniversityName(),
-                        course.getUniversity().getUniversityId()
+                        course.getStatus()
                 ))
                 .toList();
         return ResponseEntity.ok(courseResponses);
     }
 
-    @GetMapping("/api/course/all/{universityId}")
-    public ResponseEntity<?> getAllCourses(@PathVariable Long universityId) {
-        try {
-            List<Course> courses = courseService.getAllCoursesByUniversity(universityId);
+    @PutMapping("api/courses/{courseId}/activate")
+    public ResponseEntity<String> activateCourse(
+            @PathVariable Long courseId,
+            @RequestParam Long universityId) {
 
-            // Map to CourseResponse DTO
-            List<CourseResponse> courseResponses = courses.stream()
-                    .map(course -> new CourseResponse(
-                            course.getCourseId(),
-                            course.getCourseName(),
-                            course.getCourseDescription(),
-                            course.getStatus(),
-                            course.getUniversity().getUniversityName(),
-                            course.getUniversity().getUniversityId()
-                    ))
-                    .toList();
-            return ResponseEntity.ok(courseResponses);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to fetch course"));
-        }
+        courseService.updateCourseStatus(courseId, universityId, "Active");
+        return ResponseEntity.ok("Course activated for university " + universityId);
     }
 
-    @PutMapping("/api/course/{courseId}/activate")
-    public ResponseEntity<String> activateCourse(@PathVariable Long courseId) {
-        courseService.updateCourseStatus(courseId, "Active");
-        return ResponseEntity.ok("Course activated");
-    }
+    @PutMapping(".api/courses/{courseId}/deactivate")
+    public ResponseEntity<String> deactivateCourse(
+            @PathVariable Long courseId,
+            @RequestParam Long universityId) {
 
-    @PutMapping("/api/course/{courseId}/deactivate")
-    public ResponseEntity<String> deactivateCourse(@PathVariable Long courseId) {
-        courseService.updateCourseStatus(courseId, "Inactive");
-        return ResponseEntity.ok("Course deactivated");
+        courseService.updateCourseStatus(courseId, universityId, "Inactive");
+        return ResponseEntity.ok("Course deactivated for university " + universityId);
     }
 
     @PostMapping(path = "/api/customization/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -218,6 +196,21 @@ public class AdminController {
     public ResponseEntity<CustomizationResponse> getTheme(@PathVariable Long universityId) {
         CustomizationResponse response = customizationService.getTheme(universityId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/course/active/all")
+    public ResponseEntity<List<CourseResponse>> getAllActiveCourses() {
+        List<Course> activeCourses = courseService.getAllActiveCourses("Active");
+
+        List<CourseResponse> courseResponses = activeCourses.stream()
+                .map(course -> new CourseResponse(
+                        course.getCourseId(),
+                        course.getCourseName(),
+                        course.getCourseDescription(),
+                        course.getStatus()
+                ))
+                .toList();
+        return ResponseEntity.ok(courseResponses);
     }
 
 }

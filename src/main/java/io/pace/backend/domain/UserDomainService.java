@@ -13,7 +13,9 @@ public interface UserDomainService {
 
     void updateUserRoles(Long userId, String roleState);
 
-    void updatePassword(Long userId, String newPassword);
+    boolean validateTempPassword(Long universityId, String tempPassword);
+
+    void updatePassword(Long universityId, String newPassword);
 
     void generatePasswordResetToken(String email);
 

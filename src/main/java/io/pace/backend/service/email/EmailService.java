@@ -18,12 +18,13 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendTemporaryPassword(String to, String tempPassword) {
+    public void sendTemporaryPassword(String to, String tempPassword, Long universityId) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Your Temporary Account Password");
         message.setText("Hello,\n\nYour temporary password is: " + tempPassword
-                + "\n\nPlease log in and change your password immediately.");
+                + "\n\nPlease log in and change your password immediately."
+        + "\n\nBase University URL: http://localhost:3000/university/"+universityId);
         mailSender.send(message);
     }
 

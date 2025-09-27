@@ -53,7 +53,6 @@ public class User {
     private Student student;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Admin admin;
 
     @ManyToOne(fetch = FetchType.LAZY)

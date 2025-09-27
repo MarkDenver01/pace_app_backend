@@ -11,8 +11,6 @@ public class CourseRequest {
     private String courseName;
     @NotBlank(message = "Course description is required")
     private String courseDescription;
-    @NotNull(message = "University ID id required")
-    private Long universityId;
 
     private String status;
 }

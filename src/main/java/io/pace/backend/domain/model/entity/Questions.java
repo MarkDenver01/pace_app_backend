@@ -30,8 +30,4 @@ public class Questions {
     @NotBlank(message = "Question is required")
     @Column(name = "question", nullable = false)
     private String question;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "university_id", nullable = false)
-    private University university;
 }

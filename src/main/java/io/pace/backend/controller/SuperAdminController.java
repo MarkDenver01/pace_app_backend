@@ -165,7 +165,8 @@ public class SuperAdminController {
 
         emailService.sendTemporaryPassword(
                 registerRequest.getEmail(),
-                registerRequest.getPassword());
+                registerRequest.getPassword(),
+                registerRequest.getUniversityId());
 
         User user = new User(
                 registerRequest.getUsername(),
@@ -180,7 +181,10 @@ public class SuperAdminController {
 
         if (tempRoles == null || tempRoles.isEmpty()) {
             role = roleRepository.findRoleByRoleState(RoleState.ADMIN)
-                    .orElseGet(() -> roleRepository.save(new Role(RoleState.ADMIN)));
+                    .orElseGet(() -> {
+                        Role newRole = new Role(RoleState.ADMIN);
+                        return roleRepository.save(newRole);
+                    });
         } else {
             String userRole = tempRoles.iterator().next().toLowerCase();
             switch (userRole) {
@@ -280,11 +284,8 @@ public class SuperAdminController {
     }
 
     @GetMapping("/api/course/count")
-    public ResponseEntity<Map<String, Long>> getCourseCount(
-            @RequestParam Long universityId,
-            @RequestParam(defaultValue = "Active") String status
-    ) {
-        long count = courseService.getCourseCountByUniversity(universityId, status);
+    public ResponseEntity<Map<String, Long>> getCourseCount(@RequestParam(defaultValue = "Active") String status) {
+        long count = courseService.getCourseCount(status);
         return ResponseEntity.ok(Map.of("count", count));
     }
 
@@ -293,19 +294,16 @@ public class SuperAdminController {
         return questionService.getAllQuestions();
     }
 
-    @GetMapping("/api/course/active")
-    public ResponseEntity<List<CourseResponse>> getActiveCoursesByUniversity(@RequestParam Long universityId) {
-        List<Course> activeCourses = courseService.getActiveCoursesByUniversity(universityId);
+    @GetMapping("/api/course/active/all")
+    public ResponseEntity<List<CourseResponse>> getAllActiveCourses() {
+        List<Course> activeCourses = courseService.getAllActiveCourses("Active");
 
-        // Map to CourseResponse DTO
         List<CourseResponse> courseResponses = activeCourses.stream()
                 .map(course -> new CourseResponse(
                         course.getCourseId(),
                         course.getCourseName(),
                         course.getCourseDescription(),
-                        course.getStatus(),
-                        course.getUniversity().getUniversityName(),
-                        course.getUniversity().getUniversityId()
+                        course.getStatus()
                 ))
                 .toList();
         return ResponseEntity.ok(courseResponses);
@@ -314,11 +312,6 @@ public class SuperAdminController {
     @GetMapping("/api/questions/byCourse/{courseId}")
     public List<QuestionResponse> getByCourse(@PathVariable Long courseId) {
         return questionService.getQuestionsByCourse(courseId);
-    }
-
-    @GetMapping("/api/questions/byUniversity/{universityId}")
-    public List<QuestionResponse> getByUniversity(@PathVariable Long universityId) {
-        return questionService.getQuestionsByUniversity(universityId);
     }
 
     @PostMapping("/api/questions/save")
@@ -367,6 +360,14 @@ public class SuperAdminController {
 
         questionRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/count/{universityId}")
+    public ResponseEntity<Map<String, Long>> getActiveCourseCountByUniversity(
+            @PathVariable Long universityId,
+            @RequestParam(defaultValue = "Active") String status) {
+        long count = courseService.getActiveCourseCountByUniversity(universityId, status);
+        return ResponseEntity.ok(Map.of("count", count));
     }
 
     // HANDLE VALIDATION ERRORS

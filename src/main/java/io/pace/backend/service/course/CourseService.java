@@ -37,29 +37,11 @@ public class CourseService {
         courseRepository.delete(course);
     }
 
-    public List<CourseResponse> getAvailableCourses(Long universityId, String status) {
-        return courseRepository.findByUniversity_UniversityIdAndStatus(universityId, status).stream()
-                .map(c -> new CourseResponse(
-                        c.getCourseId(),
-                        c.getCourseName(),
-                        c.getCourseDescription(),
-                        c.getStatus(),
-                        c.getUniversity().getUniversityName(),
-                        universityId
-                ))
-                .collect(Collectors.toList());
-    }
-
     public List<CourseResponse> getAllCourses() {
         return courseRepository.findAll().stream()
                 .map(c -> {
                     int max = 0;
                     int assessed = 0;
-
-                    // count all students in the university as the course
-                    if (c.getUniversity() != null && c.getUniversity().getStudents() != null) {
-                        max = c.getUniversity().getStudents().size();
-                    }
 
                     // no assessment logic yet, so return to 0
                     assessed = 0;
@@ -69,8 +51,6 @@ public class CourseService {
                             c.getCourseName(),
                             c.getCourseDescription(),
                             c.getStatus(),
-                            c.getUniversity().getUniversityId(),
-                            c.getUniversity().getUniversityName(),
                             max,
                             assessed
                     );
@@ -79,13 +59,9 @@ public class CourseService {
     }
 
     public CourseResponse saveCourse(CourseRequest request) {
-        University university = universityRepository.findById(Math.toIntExact(request.getUniversityId()))
-                .orElseThrow(() -> new IllegalArgumentException("University not found with ID: " + request.getUniversityId()));
-
         Course course = new Course();
         course.setCourseName(request.getCourseName());
         course.setCourseDescription(request.getCourseDescription());
-        course.setUniversity(university);
         course.setStatus(
                 (request.getStatus() == null || request.getStatus().isBlank()) ? "Active" : request.getStatus()
         );
@@ -95,21 +71,15 @@ public class CourseService {
                 saved.getCourseId(),
                 saved.getCourseName(),
                 saved.getCourseDescription(),
-                saved.getStatus(),
-                university.getUniversityName(),
-                university.getUniversityId());
+                saved.getStatus());
     }
 
     public CourseResponse updateCourse(Long courseId, CourseRequest request) {
         Course existingCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with ID: " + courseId));
 
-        University university = universityRepository.findById(Math.toIntExact(request.getUniversityId()))
-                .orElseThrow(() -> new IllegalArgumentException("University not found with ID: " + request.getUniversityId()));
-
         existingCourse.setCourseName(request.getCourseName());
         existingCourse.setCourseDescription(request.getCourseDescription());
-        existingCourse.setUniversity(university);
         existingCourse.setStatus(
                 (request.getStatus() == null || request.getStatus().isBlank()) ? existingCourse.getStatus() : request.getStatus()
         );
@@ -120,29 +90,31 @@ public class CourseService {
                 updated.getCourseId(),
                 updated.getCourseName(),
                 updated.getCourseDescription(),
-                updated.getStatus(),
-                updated.getUniversity().getUniversityName(),
-                updated.getUniversity().getUniversityId()
+                updated.getStatus()
         );
     }
 
+    public List<Course> getAllActiveCourses(String activeStatus) {
+        return courseRepository.findAllByStatus(activeStatus);
+    }
 
-    public long getCourseCountByUniversity(Long universityId, String status) {
+    public long getCourseCount( String status) {
+        return courseRepository.countByStatus(status);
+    }
+
+    public void updateCourseStatus(Long courseId, Long universityId, String status) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        University university = universityRepository.findByUniversityId(universityId)
+                .orElseThrow(() -> new RuntimeException("University not found"));
+
+        course.setStatus(status);
+        course.setUniversity(university);
+        courseRepository.save(course);
+    }
+
+    public long getActiveCourseCountByUniversity(Long universityId, String status) {
         return courseRepository.countByUniversity_UniversityIdAndStatus(universityId, status);
-    }
-
-    public List<Course> getActiveCoursesByUniversity(Long universityId) {
-        return courseRepository.findByUniversity_UniversityIdAndStatusIgnoreCase(universityId, "Active");
-    }
-
-    public List<Course> getAllCoursesByUniversity(Long universityId) {
-        return courseRepository.findByUniversity_UniversityId(universityId);
-    }
-
-    public void updateCourseStatus(Long courseId, String status) {
-        Course existingCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found with ID: " + courseId));
-        existingCourse.setStatus(status);
-        courseRepository.save(existingCourse);
     }
 }

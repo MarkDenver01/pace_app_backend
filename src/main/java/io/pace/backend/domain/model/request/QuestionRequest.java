@@ -15,6 +15,4 @@ public class QuestionRequest {
 
     @NotBlank(message = "Question text is required")
     private String question;
-
-    private Long universityId;
 }

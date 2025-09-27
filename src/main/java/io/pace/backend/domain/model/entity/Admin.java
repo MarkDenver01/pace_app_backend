@@ -48,8 +48,8 @@ public class Admin {
     @Column(name = "user_account_status", length = 20)
     private AccountStatus userAccountStatus;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
 

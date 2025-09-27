@@ -24,7 +24,6 @@ import java.util.UUID;
 
 import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
 
-@Transactional
 @Service
 public class UserService implements UserDomainService {
     @Value("${base.url.react}")
@@ -75,22 +74,39 @@ public class UserService implements UserDomainService {
         userRepository.save(user);
     }
 
-    @Override
-    public void updatePassword(Long userId, String newPassword) {
-        // fetch user or throw
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // encode new password
+    @Override
+    public boolean validateTempPassword(Long universityId, String tempPassword) {
+        // Find user by universityId
+        Optional<User> optionalUser = userRepository.findByUniversity_UniversityId(universityId);
+
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+
+        User user = optionalUser.get();
+
+        // Compare raw tempPassword with stored (assuming temp is encoded)
+        return passwordEncoder.matches(tempPassword, user.getPassword());
+    }
+
+    @Override
+    public void updatePassword(Long universityId, String newPassword) {
+        // Fetch user or throw
+        User user = userRepository.findByUniversity_UniversityId(universityId)
+                .orElseThrow(() -> new RuntimeException("User not found for this university"));
+
+        // Encode and update
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // update admin status if applicable
+        // Update Admin status if exists
         adminRepository.findByUser_UserId(user.getUserId()).ifPresent(admin -> {
             admin.setUserAccountStatus(AccountStatus.VERIFIED);
             adminRepository.save(admin);
         });
     }
+
 
     @Override
     public void generatePasswordResetToken(String email) {

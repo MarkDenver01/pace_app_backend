@@ -10,14 +10,12 @@ public class CourseResponse {
     private String courseName;
     private String courseDescription;
     private String status;
-    private Long universityId;
-    private String universityName;
     private int assessed;
     private int max;
 
 
 
-    public CourseResponse(Long courseId, String courseName, String courseDescription, String status, String universityName, Long universityId) {
-        this(courseId, courseName, courseDescription, status, universityId, universityName, 0, 0);
+    public CourseResponse(Long courseId, String courseName, String courseDescription, String status) {
+        this(courseId, courseName, courseDescription, status, 0, 0);
     }
 }

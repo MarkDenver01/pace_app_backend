@@ -4,10 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import io.pace.backend.config.FacebookConfig;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
-import io.pace.backend.domain.model.entity.Role;
-import io.pace.backend.domain.model.entity.Student;
-import io.pace.backend.domain.model.entity.University;
-import io.pace.backend.domain.model.entity.User;
+import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
 import io.pace.backend.domain.model.request.LoginRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
@@ -19,6 +16,7 @@ import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseRecommendationService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.customization.CustomizationService;
+import io.pace.backend.service.link.UniversityLinkService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_details.CustomizedUserDetails;
@@ -33,6 +31,7 @@ import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -69,7 +68,7 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
-    
+
     @Autowired
     StudentRepository studentRepository;
 
@@ -84,6 +83,9 @@ public class UserController {
 
     @Autowired
     UniversityService universityService;
+
+    @Autowired
+    UniversityLinkService universityLinkService;
 
     @Autowired
     AuthUtil authUtil;
@@ -112,13 +114,32 @@ public class UserController {
     @Autowired
     SocialLoginService socialLoginService;
 
-    @PutMapping("/public/update-password/{id}")
-    public ResponseEntity<?> updatePassword(@PathVariable("id") Long id, @RequestParam String newPassword) {
+    @Value("${dynamic_link_base_url}")
+    private String dynamicLinkBaseUrl;
+
+    @PostMapping("/public/validate-temp-password/{universityId}")
+    public ResponseEntity<?> validateTempPassword(
+            @PathVariable Long universityId,
+            @RequestParam String tempPassword) {
+
+        boolean isValid = userService.validateTempPassword(universityId, tempPassword);
+
+        return ResponseEntity.ok().body(Map.of("valid", isValid));
+    }
+
+    @PutMapping("/public/update-password/{universityId}")
+    public ResponseEntity<?> updatePassword(
+            @PathVariable Long universityId,
+            @RequestParam String newPassword) {
+
         try {
-            userService.updatePassword(id, newPassword);
-            return ResponseEntity.ok().body("success");
+            userService.updatePassword(universityId, newPassword);
+            return ResponseEntity.ok().body(Map.of("success", true));
         } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", ex.getMessage()
+            ));
         }
     }
 
@@ -369,11 +390,6 @@ public class UserController {
         return ResponseEntity.ok(questionService.getAllQuestions());
     }
 
-    @GetMapping("/api/questions/all/{universityId}")
-    public ResponseEntity<List<QuestionResponse>> getAllQuestionsByUniversity(@PathVariable Long universityId) {
-        return ResponseEntity.ok(questionService.getAllQuestionsByUniversity(universityId));
-    }
-
     @PostMapping("/api/course_recommended/top3")
     public ResponseEntity<List<CourseMatchResponse>> getRecommendedCourse(@RequestBody List<AnsweredQuestionRequest> answers) {
         List<CourseMatchResponse> results = courseRecommendationService.getTopCourses(answers);
@@ -390,4 +406,29 @@ public class UserController {
                     .body(Map.of("error", "Failed to fetch universities"));
         }
     }
+
+    @PostMapping("/public/user/account/{universityId}")
+    public ResponseEntity<Map<String, String>> generateLink(@PathVariable Long universityId) {
+        UniversityLink universityLink = universityLinkService.createOrGetLink(Math.toIntExact(universityId));
+
+        String fullLink = dynamicLinkBaseUrl + universityLink.getPath() +"&token="+ universityLink.getToken();
+        return ResponseEntity.ok(Map.of(
+                "universityId", String.valueOf(universityId),
+                "link", fullLink
+        ));
+    }
+
+    @GetMapping("/public/dynamic_link/{token}")
+    public ResponseEntity<UniversityLink> resolveByToken(@PathVariable String token) {
+        return universityLinkService.getByToken(token)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/public/generated_dynamic_link/{universityId}")
+    public ResponseEntity<String> getGeneratedLink(@PathVariable Long universityId) {
+        String fullLink = universityLinkService.getFullLinkByUniversity(universityId);
+        return ResponseEntity.ok(fullLink);
+    }
+
 }

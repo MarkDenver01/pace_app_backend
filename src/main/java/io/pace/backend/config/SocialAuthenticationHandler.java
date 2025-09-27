@@ -1,7 +1,6 @@
 package io.pace.backend.config;
 
 import io.pace.backend.domain.enums.RoleState;
-import io.pace.backend.domain.UserDomainService;
 import io.pace.backend.domain.model.entity.Role;
 import io.pace.backend.domain.model.entity.User;
 import io.pace.backend.repository.RoleRepository;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SocialAuthenticationHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
-    private final UserDomainService userDomainService;
+    private final UserService userService;
 
     @Autowired
     private final JwtUtils jwtUtils;
@@ -44,8 +43,6 @@ public class SocialAuthenticationHandler extends SavedRequestAwareAuthentication
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private UserService userService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -60,7 +57,7 @@ public class SocialAuthenticationHandler extends SavedRequestAwareAuthentication
             this.email = email;
             this.idAttributeKey = "id";
 
-            userDomainService
+            userService
                     .findByEmail(email)
                     .ifPresentOrElse(user -> {
                         Authentication securityAuth = getAuthentication(user, attributes, authToken);

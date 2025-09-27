@@ -28,10 +28,6 @@ public class Course {
     @Column(name = "course_description", nullable = false)
     private String courseDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "university_id", nullable = false)
-    private University university;
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("course")
     private List<Questions> questions = new ArrayList<>();
@@ -39,4 +35,9 @@ public class Course {
     @NotBlank(message = "Status is required")
     @Column(name = "status", nullable = false)
     private String status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id", nullable = false)
+    @JsonIgnoreProperties("courses")
+    private University university;
 }
