@@ -10,7 +10,9 @@ import io.pace.backend.domain.model.request.RegisterRequest;
 import io.pace.backend.domain.model.request.UniversityRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.*;
+import io.pace.backend.service.assessment.AssessmentService;
 import io.pace.backend.service.course.CourseService;
+import io.pace.backend.service.course.UniversityCourseService;
 import io.pace.backend.service.email.EmailService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.university.UniversityService;
@@ -37,6 +39,9 @@ public class SuperAdminController {
     CourseService courseService;
 
     @Autowired
+    UniversityCourseService universityCourseService;
+
+    @Autowired
     EmailService emailService;
 
     @Autowired
@@ -44,6 +49,9 @@ public class SuperAdminController {
 
     @Autowired
     QuestionService questionService;
+
+    @Autowired
+    AssessmentService assessmentService;
 
     @Autowired
     UserRepository userRepository;
@@ -75,6 +83,17 @@ public class SuperAdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to fetch course"));
+        }
+    }
+
+    @GetMapping("/api/universities/{universityId}/courses")
+    public ResponseEntity<?> getCoursesByUniversity(@PathVariable Long universityId) {
+        try {
+            List<CourseResponse> courses = universityCourseService.getActiveCoursesByUniversity(universityId);
+            return ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch courses for university " + universityId));
         }
     }
 
@@ -362,12 +381,26 @@ public class SuperAdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/api/count/{universityId}")
+    @GetMapping("/api/universities/courses/count/{universityId}")
     public ResponseEntity<Map<String, Long>> getActiveCourseCountByUniversity(
             @PathVariable Long universityId,
             @RequestParam(defaultValue = "Active") String status) {
-        long count = courseService.getActiveCourseCountByUniversity(universityId, status);
+        long count = universityCourseService.getActiveCourseCountByUniversity(universityId, status);
         return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @GetMapping("/api/assessment/stats")
+    public ResponseEntity<?> getAssessmentStats(
+            @RequestParam Long universityId,
+            @RequestParam Long courseId
+    ) {
+        try {
+            Map<String, Long> stats = assessmentService.getAssessmentStats(universityId, courseId);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch assessment statistics"));
+        }
     }
 
     // HANDLE VALIDATION ERRORS

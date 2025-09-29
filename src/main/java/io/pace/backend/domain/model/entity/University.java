@@ -1,5 +1,7 @@
 package io.pace.backend.domain.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -38,4 +40,8 @@ public class University {
 
     @OneToOne(mappedBy = "university", cascade = CascadeType.ALL, orphanRemoval = true)
     private UniversityLink universityLink;
+
+    @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<UniversityCourse> universityCourses = new ArrayList<>();
 }

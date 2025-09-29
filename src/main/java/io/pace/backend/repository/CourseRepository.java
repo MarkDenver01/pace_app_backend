@@ -16,5 +16,5 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     long countByStatus(String status);
 
-    long countByUniversity_UniversityIdAndStatus(Long universityId, String status);
+
 }

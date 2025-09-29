@@ -32,7 +32,11 @@ public class StudentAssessment {
     @Column(name = "email")
     private String email;
 
-    // TODO GET TOP 3 COURSES
-    // TODO GET TIME ACTIVE
-    // TODO UNIVERSITY
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id", nullable = false)
+    private University university;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course recommendedCourse;
 }

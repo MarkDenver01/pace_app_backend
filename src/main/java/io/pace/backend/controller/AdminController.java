@@ -11,6 +11,7 @@ import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;
+import io.pace.backend.service.course.UniversityCourseService;
 import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.email.EmailService;
 import io.pace.backend.service.user_login.UserService;
@@ -66,6 +67,9 @@ public class AdminController {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    UniversityCourseService universityCourseService;
 
     @Autowired
     AuthUtil authUtil;
@@ -152,6 +156,22 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("count", count));
     }
 
+    @GetMapping("/api/university/courses/count/{universityId}")
+    public ResponseEntity<Map<String, Long>> getActiveCourseCountByUniversity(
+            @PathVariable Long universityId,
+            @RequestParam(defaultValue = "Active") String status) {
+        long count = universityCourseService.getActiveCourseCountByUniversity(universityId, status);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    @PostMapping("/api/universities/{universityId}/courses/{courseId}")
+    public ResponseEntity<UniversityCourse> assignCourseToUniversity(
+            @PathVariable Long universityId,
+            @PathVariable Long courseId
+    ) {
+        return ResponseEntity.ok(universityCourseService.assignCourse(courseId, universityId));
+    }
+
     @GetMapping("/api/course/all/active")
     public ResponseEntity<List<CourseResponse>> getActiveCoursesByUniversity() {
         List<Course> activeCourses = courseService.getAllActiveCourses("Active");
@@ -168,22 +188,24 @@ public class AdminController {
         return ResponseEntity.ok(courseResponses);
     }
 
-    @PutMapping("api/courses/{courseId}/activate")
-    public ResponseEntity<String> activateCourse(
-            @PathVariable Long courseId,
-            @RequestParam Long universityId) {
-
-        courseService.updateCourseStatus(courseId, universityId, "Active");
-        return ResponseEntity.ok("Course activated for university " + universityId);
+    // Get all university-specific courses
+    @GetMapping("/api/course/university/{universityId}")
+    public ResponseEntity<List<UniversityCourse>> getCoursesForUniversity(@PathVariable Long universityId) {
+        return ResponseEntity.ok(universityCourseService.getCoursesForUniversity(universityId));
     }
 
-    @PutMapping(".api/courses/{courseId}/deactivate")
-    public ResponseEntity<String> deactivateCourse(
-            @PathVariable Long courseId,
-            @RequestParam Long universityId) {
+    @PutMapping("/api/courses/{universityId}/activate/{courseId}")
+    public ResponseEntity<UniversityCourse> activateCourse(
+            @PathVariable Long universityId,
+            @PathVariable Long courseId) {
+        return ResponseEntity.ok(universityCourseService.activateCourse(universityId, courseId));
+    }
 
-        courseService.updateCourseStatus(courseId, universityId, "Inactive");
-        return ResponseEntity.ok("Course deactivated for university " + universityId);
+    @PutMapping("/api/courses/{universityId}/deactivate/{courseId}")
+    public ResponseEntity<UniversityCourse> deactivateCourse(
+            @PathVariable Long universityId,
+            @PathVariable Long courseId) {
+        return ResponseEntity.ok(universityCourseService.deactivateCourse(universityId, courseId));
     }
 
     @PostMapping(path = "/api/customization/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

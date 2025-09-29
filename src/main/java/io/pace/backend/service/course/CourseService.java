@@ -101,20 +101,4 @@ public class CourseService {
     public long getCourseCount( String status) {
         return courseRepository.countByStatus(status);
     }
-
-    public void updateCourseStatus(Long courseId, Long universityId, String status) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        University university = universityRepository.findByUniversityId(universityId)
-                .orElseThrow(() -> new RuntimeException("University not found"));
-
-        course.setStatus(status);
-        course.setUniversity(university);
-        courseRepository.save(course);
-    }
-
-    public long getActiveCourseCountByUniversity(Long universityId, String status) {
-        return courseRepository.countByUniversity_UniversityIdAndStatus(universityId, status);
-    }
 }
