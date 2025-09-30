@@ -24,6 +24,17 @@ public class UniversityService {
     @Autowired
     private UserRepository userRepository;
 
+    public UniversityResponse getUniversity(Long universityId) {
+        return universityRepository.findByUniversityId(universityId)
+                .stream()
+                .findFirst() // get the first (and only) match
+                .map(u -> new UniversityResponse(
+                        u.getUniversityId(),
+                        u.getUniversityName()
+                ))
+                .orElseThrow(() -> new RuntimeException("University not found with id " + universityId));
+    }
+
     public List<UniversityResponse> getAllUniversities(){
         return universityRepository.findAll().stream()
                 .map(u -> new UniversityResponse(

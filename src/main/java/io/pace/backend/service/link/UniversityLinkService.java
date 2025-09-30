@@ -61,6 +61,7 @@ public class UniversityLinkService {
                 .collect(Collectors.joining());
     }
 
-
-
+    public boolean isTokenValid(String token) {
+        return universityLinkRepository.findByToken(token).isPresent();
+    }
 }

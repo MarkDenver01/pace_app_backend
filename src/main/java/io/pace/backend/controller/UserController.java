@@ -407,6 +407,17 @@ public class UserController {
         }
     }
 
+    @GetMapping("/public/university/select")
+    public ResponseEntity<?> getUniversityById(@RequestParam("university_id") Long universityId) {
+        try {
+            UniversityResponse university = universityService.getUniversity(universityId);
+            return ResponseEntity.ok(university); // return a single object, not a list
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/public/user/account/{universityId}")
     public ResponseEntity<Map<String, String>> generateLink(@PathVariable Long universityId) {
         UniversityLink universityLink = universityLinkService.createOrGetLink(Math.toIntExact(universityId));
@@ -429,6 +440,17 @@ public class UserController {
     public ResponseEntity<String> getGeneratedLink(@PathVariable Long universityId) {
         String fullLink = universityLinkService.getFullLinkByUniversity(universityId);
         return ResponseEntity.ok(fullLink);
+    }
+
+    @GetMapping("/public/dynamic_link/token_validation")
+    public ResponseEntity<?> validateToken(@RequestParam("token") String token) {
+        boolean isValid = universityLinkService.isTokenValid(token);
+
+        if (isValid) {
+            return ResponseEntity.ok("Success");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid token");
+        }
     }
 
 }
