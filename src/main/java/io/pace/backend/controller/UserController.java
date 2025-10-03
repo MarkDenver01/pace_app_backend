@@ -8,11 +8,13 @@ import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
 import io.pace.backend.domain.model.request.LoginRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
+import io.pace.backend.domain.model.request.StudentAssessmentRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.StudentRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
+import io.pace.backend.service.assessment.AssessmentService;
 import io.pace.backend.service.course.CourseRecommendationService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.customization.CustomizationService;
@@ -116,6 +118,8 @@ public class UserController {
 
     @Value("${dynamic_link_base_url}")
     private String dynamicLinkBaseUrl;
+    @Autowired
+    private AssessmentService assessmentService;
 
     @PostMapping("/public/validate-temp-password/{universityId}")
     public ResponseEntity<?> validateTempPassword(
@@ -385,7 +389,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/api/questions")
+    @GetMapping("/api/questions/all")
     public ResponseEntity<List<QuestionResponse>> getAllQuestions() {
         return ResponseEntity.ok(questionService.getAllQuestions());
     }
@@ -393,6 +397,12 @@ public class UserController {
     @PostMapping("/api/course_recommended/top3")
     public ResponseEntity<List<CourseMatchResponse>> getRecommendedCourse(@RequestBody List<AnsweredQuestionRequest> answers) {
         List<CourseMatchResponse> results = courseRecommendationService.getTopCourses(answers);
+
+//        if (!results.isEmpty()) {
+//            assessmentService.saveRecommendedCourse(studentAssessmentId,
+//                    results.get(0).getCourseId()); // or fetch full entity
+//        }
+
         return ResponseEntity.ok(results);
     }
 
@@ -443,14 +453,26 @@ public class UserController {
     }
 
     @GetMapping("/public/dynamic_link/token_validation")
-    public ResponseEntity<?> validateToken(@RequestParam("token") String token) {
+    public ResponseEntity<UniversityLinkResponse> validateToken(@RequestParam("token") String token) {
         boolean isValid = universityLinkService.isTokenValid(token);
 
         if (isValid) {
-            return ResponseEntity.ok("Success");
+            return ResponseEntity.ok(new UniversityLinkResponse("success"));
         } else {
-            return ResponseEntity.badRequest().body("Invalid token");
+            return ResponseEntity.badRequest().body(new UniversityLinkResponse("failed"));
         }
+    }
+
+    @GetMapping("/public/customization")
+    public ResponseEntity<CustomizationResponse> getTheme(@RequestParam("universityId") Long universityId) {
+        CustomizationResponse response = customizationService.getTheme(universityId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/student_assessment/save")
+    public ResponseEntity<StudentAssessmentResponse> saveAssessment(@RequestBody StudentAssessmentRequest request) {
+        StudentAssessmentResponse response = assessmentService.saveStudentAssessment(request);
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -176,6 +176,9 @@ public class UserService implements UserDomainService {
                 student.setRequestedDate(LocalDateTime.now());
                 student.setUserAccountStatus(AccountStatus.PENDING); // pending
                 student.setUniversity(user.getUniversity());
+
+                userRepository.save(user);
+
                 student.setUser(user);
 
                 // encode the password
@@ -187,7 +190,6 @@ public class UserService implements UserDomainService {
                 user.setStudent(student);
 
                 studentRepository.save(student);
-                userRepository.save(user);
             } else {
                 Admin admin = new Admin();
                 admin.setUserName(user.getUserName());
