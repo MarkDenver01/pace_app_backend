@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,15 +27,20 @@ public class QuestionService {
     CourseRepository courseRepository;
 
     public List<QuestionResponse> getAllQuestions() {
-        return questionRepository.findAll().stream()
-                .map(q -> new QuestionResponse(
-                        q.getQuestionId(),
-                        q.getQuestion(),
-                        q.getCategory().name(),
-                        q.getCourse().getCourseName(),
-                        q.getCourse().getCourseDescription()
+        return new ArrayList<>(questionRepository.findAll().stream()
+                // Collect to a Map with question text as the key to remove duplicates
+                .collect(Collectors.toMap(
+                        Questions::getQuestion, // key: question text
+                        q -> new QuestionResponse(
+                                q.getQuestionId(),
+                                q.getQuestion(),
+                                q.getCategory().name(),
+                                q.getCourse().getCourseName(),
+                                q.getCourse().getCourseDescription()
+                        ),
+                        (existing, replacement) -> existing // if duplicate, keep the first
                 ))
-                .collect(Collectors.toList());
+                .values());
     }
 
     public List<QuestionResponse> getQuestionsByCourse(Long courseId) {
