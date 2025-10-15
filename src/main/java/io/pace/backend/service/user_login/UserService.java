@@ -6,7 +6,7 @@ import io.pace.backend.domain.UserDomainService;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.repository.*;
-import io.pace.backend.service.email.EmailService;
+import io.pace.backend.service.email.GmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +51,7 @@ public class UserService implements UserDomainService {
     PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
-    EmailService emailService;
+    GmailService emailService;
 
     @Override
     public List<User> getAllUsers() {

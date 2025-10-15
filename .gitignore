@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### gmail apis ###
+src/main/resources/client_secret.json

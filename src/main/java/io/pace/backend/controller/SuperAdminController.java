@@ -13,7 +13,7 @@ import io.pace.backend.repository.*;
 import io.pace.backend.service.assessment.AssessmentService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.course.UniversityCourseService;
-import io.pace.backend.service.email.EmailService;
+import io.pace.backend.service.email.GmailService;
 import io.pace.backend.service.questions.QuestionService;
 import io.pace.backend.service.university.UniversityService;
 import io.pace.backend.service.user_login.UserService;
@@ -42,7 +42,7 @@ public class SuperAdminController {
     UniversityCourseService universityCourseService;
 
     @Autowired
-    EmailService emailService;
+    GmailService emailService;
 
     @Autowired
     UserService userService;

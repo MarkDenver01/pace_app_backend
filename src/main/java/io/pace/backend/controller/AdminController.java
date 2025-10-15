@@ -13,7 +13,7 @@ import io.pace.backend.repository.UserRepository;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.course.UniversityCourseService;
 import io.pace.backend.service.customization.CustomizationService;
-import io.pace.backend.service.email.EmailService;
+import io.pace.backend.service.email.GmailService;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
@@ -66,7 +66,7 @@ public class AdminController {
     CourseService courseService;
 
     @Autowired
-    EmailService emailService;
+    GmailService emailService;
 
     @Autowired
     UniversityCourseService universityCourseService;
