@@ -27,7 +27,7 @@ public class GmailConfig {
     );
 
     @Bean
-    public Gmail gmailService() throws Exception {
+    public Gmail gmailClient() throws Exception {
         com.google.api.client.http.HttpTransport httpTransport =
                 GoogleNetHttpTransport.newTrustedTransport();
 

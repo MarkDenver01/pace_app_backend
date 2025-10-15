@@ -18,7 +18,7 @@ import java.util.Properties;
 @Service
 public class GmailService {
     @Autowired
-    Gmail gmail;
+    Gmail gmailClient;
 
     // Common method to send any message via Gmail API
     private void sendMessage(String to, String subject, String text) {
@@ -39,7 +39,7 @@ public class GmailService {
             Message message = new Message();
             message.setRaw(encodedEmail);
 
-            gmail.users().messages().send("me", message).execute();
+            gmailClient.users().messages().send("me", message).execute();
         } catch (MessagingException | IOException e) {
             throw new RuntimeException("Failed to send email via Gmail API: " + e.getMessage(), e);
         }
