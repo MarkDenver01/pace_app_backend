@@ -26,7 +26,8 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 backendBaseUrl,
                 reactBaseUrl,
-                androidBaseUrl
+                androidBaseUrl,
+                "http://localhost:3000" // allow localhost
         )); // base URL
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

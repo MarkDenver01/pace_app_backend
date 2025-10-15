@@ -141,11 +141,11 @@ public class SecurityConfig {
 
                 // configures Spring Security to not use HTTP sessions at all.
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                // Enable form login and basic auth
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults());
+        // Enable form login and basic auth
+        //.formLogin(Customizer.withDefaults())
+        //.httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
