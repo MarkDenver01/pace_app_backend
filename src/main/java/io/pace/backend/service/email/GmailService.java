@@ -7,6 +7,7 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,9 @@ import java.util.Properties;
 public class GmailService {
     @Autowired
     Gmail gmailClient;
+
+    @Value("${base.url.react}")
+    private String baseUrl;
 
     // Common method to send any message via Gmail API
     private void sendMessage(String to, String subject, String text) {
@@ -55,7 +59,7 @@ public class GmailService {
         String subject = "Your Temporary Account Password";
         String text = "Hello,\n\nYour temporary password is: " + tempPassword
                 + "\n\nPlease log in and change your password immediately."
-                + "\n\nBase University URL: http://localhost:3000/university/" + universityId;
+                + "\n\nBase University URL: " + baseUrl +"/university/" + universityId;
         sendMessage(to, subject, text);
     }
 
