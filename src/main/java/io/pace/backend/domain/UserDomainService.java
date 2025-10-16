@@ -15,7 +15,7 @@ public interface UserDomainService {
 
     boolean validateTempPassword(Long universityId, String tempPassword);
 
-    void updatePassword(Long universityId, String newPassword);
+    void updatePassword(String email, Long universityId, String newPassword);
 
     void generatePasswordResetToken(String email);
 

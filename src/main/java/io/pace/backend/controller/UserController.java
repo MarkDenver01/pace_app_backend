@@ -5,10 +5,7 @@ import io.pace.backend.config.FacebookConfig;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.*;
-import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
-import io.pace.backend.domain.model.request.LoginRequest;
-import io.pace.backend.domain.model.request.RegisterRequest;
-import io.pace.backend.domain.model.request.StudentAssessmentRequest;
+import io.pace.backend.domain.model.request.*;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.StudentRepository;
@@ -131,14 +128,11 @@ public class UserController {
         return ResponseEntity.ok().body(Map.of("valid", isValid));
     }
 
-    @PutMapping("/public/update-password/{universityId}")
-    public ResponseEntity<?> updatePassword(
-            @PathVariable Long universityId,
-            @RequestParam String newPassword) {
-
+    @PutMapping("/public/update-password")
+    public ResponseEntity<?> updatePassword(@RequestBody PasswordUpdateRequest request) {
         try {
-            userService.updatePassword(universityId, newPassword);
-            return ResponseEntity.ok().body(Map.of("success", true));
+            userService.updatePassword(request.getEmail(), request.getUniversityId(), request.getNewPassword());
+            return ResponseEntity.ok(Map.of("success", true));
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,

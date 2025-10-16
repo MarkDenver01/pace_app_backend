@@ -90,9 +90,13 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public void updatePassword(Long universityId, String newPassword) {
+    public void updatePassword(String email, Long universityId, String newPassword) {
         // Fetch users or throw if none exist
-        List<User> users = userRepository.findByUniversity_UniversityId(universityId);
+        List<User> users = userRepository.findByEmailAndUniversity_UniversityId(
+                email,
+                universityId
+        );
+
         if (users.isEmpty()) {
             throw new RuntimeException("User not found for this university");
         }
