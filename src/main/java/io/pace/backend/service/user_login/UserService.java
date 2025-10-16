@@ -78,25 +78,29 @@ public class UserService implements UserDomainService {
     @Override
     public boolean validateTempPassword(Long universityId, String tempPassword) {
         // Find user by universityId
-        Optional<User> optionalUser = userRepository.findByUniversity_UniversityId(universityId);
+        List<User> users = userRepository.findByUniversity_UniversityId(universityId);
 
-        if (optionalUser.isEmpty()) {
+        if (users.isEmpty()) {
             return false;
         }
 
-        User user = optionalUser.get();
-
-        // Compare raw tempPassword with stored (assuming temp is encoded)
-        return passwordEncoder.matches(tempPassword, user.getPassword());
+        // Check if any user's stored password matches the given tempPassword
+        return users.stream()
+                .anyMatch(user -> passwordEncoder.matches(tempPassword, user.getPassword()));
     }
 
     @Override
     public void updatePassword(Long universityId, String newPassword) {
-        // Fetch user or throw
-        User user = userRepository.findByUniversity_UniversityId(universityId)
-                .orElseThrow(() -> new RuntimeException("User not found for this university"));
+        // Fetch users or throw if none exist
+        List<User> users = userRepository.findByUniversity_UniversityId(universityId);
+        if (users.isEmpty()) {
+            throw new RuntimeException("User not found for this university");
+        }
 
-        // Encode and update
+        // Take the first user (or filter for an admin if applicable)
+        User user = users.get(0);
+
+        // Encode and update password
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
