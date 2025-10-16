@@ -59,7 +59,7 @@ public class GmailService {
         String subject = "Your Temporary Account Password";
         String text = "Hello,\n\nYour temporary password is: " + tempPassword
                 + "\n\nPlease log in and change your password immediately."
-                + "\n\nBase University URL: " + baseUrl +"/university/" + universityId;
+                + "\n\nBase University URL: " + baseUrl +"/" + universityId;
         sendMessage(to, subject, text);
     }
 
