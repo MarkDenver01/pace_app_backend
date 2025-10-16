@@ -118,6 +118,18 @@
             <artifactId>google-http-client-jackson2</artifactId>
             <version>1.39.2</version>
         </dependency>
+        <!-- Google HTTP client (GSON factory) -->
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+            <version>1.43.3</version>
+        </dependency>
+        <!-- Google OAuth client -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.34.1</version>
+        </dependency>
         <!-- Gmail API Client -->
         <dependency>
             <groupId>com.google.api-client</groupId>
