@@ -114,7 +114,7 @@ public class  UserController {
     @Autowired
     SocialLoginService socialLoginService;
 
-    @Value("${dynamic_link_base_url}")
+    @Value("${base.url.react}")
     private String dynamicLinkBaseUrl;
     @Autowired
     private AssessmentService assessmentService;
