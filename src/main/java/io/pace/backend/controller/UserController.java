@@ -46,13 +46,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
 @RestController
 @RequestMapping("/user")
-public class UserController {
+public class  UserController {
     @Autowired
     JwtUtils jwtUtils;
 
@@ -411,6 +412,18 @@ public class UserController {
         }
     }
 
+    @GetMapping("/public/link/{token}")
+    public ResponseEntity<Void> handleRedirect(@PathVariable String token) {
+        try {
+            String redirectUrl = universityLinkService.resolveRedirectUrl(token);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(redirectUrl))
+                    .build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @GetMapping("/public/university/select")
     public ResponseEntity<?> getUniversityById(@RequestParam("university_id") Long universityId) {
         try {
@@ -422,9 +435,9 @@ public class UserController {
         }
     }
 
-    @PostMapping("/public/user/account/{universityId}")
+    @PostMapping("/public/dynamic_link/generate/{universityId}")
     public ResponseEntity<Map<String, String>> generateLink(@PathVariable Long universityId) {
-        UniversityLink universityLink = universityLinkService.createOrGetLink(Math.toIntExact(universityId));
+        UniversityLink universityLink = universityLinkService.createOrGetLink(universityId);
 
         String fullLink = dynamicLinkBaseUrl + universityLink.getPath() +"&token="+ universityLink.getToken();
         return ResponseEntity.ok(Map.of(
@@ -433,28 +446,17 @@ public class UserController {
         ));
     }
 
-    @GetMapping("/public/dynamic_link/{token}")
+    @GetMapping("/public/dynamic_link/verify/{token}")
     public ResponseEntity<UniversityLink> resolveByToken(@PathVariable String token) {
         return universityLinkService.getByToken(token)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/public/generated_dynamic_link/{universityId}")
+    @GetMapping("/public/dynamic_link/get/{universityId}")
     public ResponseEntity<String> getGeneratedLink(@PathVariable Long universityId) {
-        String fullLink = universityLinkService.getFullLinkByUniversity(universityId);
-        return ResponseEntity.ok(fullLink);
-    }
-
-    @GetMapping("/public/dynamic_link/token_validation")
-    public ResponseEntity<UniversityLinkResponse> validateToken(@RequestParam("token") String token) {
-        boolean isValid = universityLinkService.isTokenValid(token);
-
-        if (isValid) {
-            return ResponseEntity.ok(new UniversityLinkResponse("success"));
-        } else {
-            return ResponseEntity.badRequest().body(new UniversityLinkResponse("failed"));
-        }
+        String dynamicLink = universityLinkService.getShortLink(universityId);
+        return ResponseEntity.ok(dynamicLink);
     }
 
     @GetMapping("/public/customization")
