@@ -1,5 +1,6 @@
 package io.pace.backend.domain.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class UniversityLink {
     @Column(name = "path", nullable = false)
     private String path;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "university_id", referencedColumnName = "university_id", unique = true)
     private University university;
