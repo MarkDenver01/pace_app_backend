@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,9 +27,6 @@ public class UniversityLinkService {
     @Value("${app.base.frontend.notinstalled}")
     private String notInstalledBaseUrl;
 
-    @Value("${base.url.backend}")
-    private String baseUrl;
-
     public UniversityLink createOrGetLink(Long universityId) {
         return universityLinkRepository.findByUniversityUniversityId(universityId)
                 .orElseGet(() -> {
@@ -46,23 +42,9 @@ public class UniversityLinkService {
                 });
     }
 
-    public Optional<UniversityLink> getByToken(String token) {
-        return universityLinkRepository.findByToken(token);
-    }
-
-    public String getShortLink(Long universityId) {
-        UniversityLink link = universityLinkRepository.findByUniversity_UniversityId(universityId);
-        if (link == null) throw new RuntimeException("Link not found for universityId: " + universityId);
-
-        return baseUrl + link.getPath();
-    }
-
-    public String resolveRedirectUrl(String token) {
+    public String getDynamicLink(String token, boolean isAppInstalled) {
         UniversityLink link = universityLinkRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
-
-        // Optional: you could check user-agent or device info
-        boolean isAppInstalled = false; // this logic could be improved later
 
         if (isAppInstalled) {
             return String.format("%s/university?universityId=%d&token=%s",
