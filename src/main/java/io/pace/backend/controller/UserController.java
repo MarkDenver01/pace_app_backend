@@ -438,7 +438,7 @@ public class  UserController {
         UniversityLink universityLink = universityLinkService.updateToken(universityId);
 
         String fullLink = dynamicLinkBaseUrl + universityLink.getPath()
-                + "&universityId=" + universityLink.getUniversity().getUniversityId()
+                + "?universityId=" + universityLink.getUniversity().getUniversityId()
                 + "&token=" + universityLink.getToken();
 
         return ResponseEntity.ok(Map.of(
