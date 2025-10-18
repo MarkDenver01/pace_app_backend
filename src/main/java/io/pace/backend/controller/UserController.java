@@ -420,10 +420,27 @@ public class  UserController {
     }
 
     @PostMapping("/public/dynamic_link/generate/{universityId}")
-    public ResponseEntity<Map<String, String>> generateLink(@PathVariable Long universityId) {
-        UniversityLink universityLink = universityLinkService.createOrGetLink(universityId);
+    public ResponseEntity<Map<String, String>> getOrCreateLink(@PathVariable Long universityId) {
+        UniversityLink universityLink = universityLinkService.getOrCreateLink(universityId);
 
-        String fullLink = dynamicLinkBaseUrl + universityLink.getPath() +"&token="+ universityLink.getToken();
+        String fullLink = dynamicLinkBaseUrl + universityLink.getPath()
+                + "&universityId=" + universityLink.getUniversity().getUniversityId()
+                + "&token=" + universityLink.getToken();
+
+        return ResponseEntity.ok(Map.of(
+                "universityId", String.valueOf(universityId),
+                "link", fullLink
+        ));
+    }
+
+    @PutMapping("/public/dynamic_link/update_token/{universityId}")
+    public ResponseEntity<Map<String, String>> updateToken(@PathVariable Long universityId) {
+        UniversityLink universityLink = universityLinkService.updateToken(universityId);
+
+        String fullLink = dynamicLinkBaseUrl + universityLink.getPath()
+                + "&universityId=" + universityLink.getUniversity().getUniversityId()
+                + "&token=" + universityLink.getToken();
+
         return ResponseEntity.ok(Map.of(
                 "universityId", String.valueOf(universityId),
                 "link", fullLink

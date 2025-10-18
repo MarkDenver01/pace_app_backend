@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,19 +28,25 @@ public class UniversityLinkService {
     @Value("${app.base.frontend.notinstalled}")
     private String notInstalledBaseUrl;
 
-    public UniversityLink createOrGetLink(Long universityId) {
+    public UniversityLink getOrCreateLink(Long universityId) {
+        University university = universityRepository.findById(Math.toIntExact(universityId))
+                .orElseThrow(() -> new IllegalArgumentException("University not found"));
+
         return universityLinkRepository.findByUniversityUniversityId(universityId)
                 .orElseGet(() -> {
-                    University university = universityRepository.findById(Math.toIntExact(universityId))
-                            .orElseThrow(() -> new IllegalArgumentException("University not found"));
-
-                    UniversityLink link = new UniversityLink();
-                    link.setUniversity(university);
-                    link.setToken(generateToken(10));
-                    link.setPath("/link/" + link.getToken());
-
-                    return universityLinkRepository.save(link);
+                    UniversityLink newLink = new UniversityLink();
+                    newLink.setUniversity(university);
+                    newLink.setPath("/app-link");
+                    newLink.setToken(generateToken(10));
+                    return universityLinkRepository.save(newLink);
                 });
+    }
+
+    public UniversityLink updateToken(Long universityId) {
+        UniversityLink link = universityLinkRepository.findByUniversityUniversityId(universityId)
+                .orElseThrow(() -> new IllegalArgumentException("Dynamic link not found for this university"));
+        link.setToken(generateToken(10));
+        return universityLinkRepository.save(link);
     }
 
     public String getDynamicLink(String token, boolean isAppInstalled) {
