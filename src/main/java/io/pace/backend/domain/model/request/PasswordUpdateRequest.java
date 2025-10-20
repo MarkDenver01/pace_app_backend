@@ -7,4 +7,5 @@ public class PasswordUpdateRequest {
     private String email;
     private Long universityId;
     private String newPassword;
+    private String emailDomain;
 }

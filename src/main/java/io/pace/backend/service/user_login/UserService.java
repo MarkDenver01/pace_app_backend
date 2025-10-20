@@ -90,7 +90,7 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public void updatePassword(String email, Long universityId, String newPassword) {
+    public void updatePassword(String email, Long universityId, String newPassword, String emailDomain) {
         // Fetch users or throw if none exist
         List<User> users = userRepository.findByEmailAndUniversity_UniversityId(
                 email,
@@ -111,6 +111,7 @@ public class UserService implements UserDomainService {
         // Update Admin status if exists
         adminRepository.findByUser_UserId(user.getUserId()).ifPresent(admin -> {
             admin.setUserAccountStatus(AccountStatus.VERIFIED);
+            admin.setEmailDomain(emailDomain);
             adminRepository.save(admin);
         });
     }

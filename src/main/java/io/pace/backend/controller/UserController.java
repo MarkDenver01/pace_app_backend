@@ -128,7 +128,8 @@ public class  UserController {
     @PutMapping("/public/update-password")
     public ResponseEntity<?> updatePassword(@RequestBody PasswordUpdateRequest request) {
         try {
-            userService.updatePassword(request.getEmail(), request.getUniversityId(), request.getNewPassword());
+            userService.updatePassword(request.getEmail(),
+                    request.getUniversityId(), request.getNewPassword(), request.getEmailDomain());
             return ResponseEntity.ok(Map.of("success", true));
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body(Map.of(
