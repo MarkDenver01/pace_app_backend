@@ -30,6 +30,9 @@ public class UniversityLink {
     @JoinColumn(name = "university_id", referencedColumnName = "university_id", unique = true)
     private University university;
 
+    @Column(name = "email_domain")
+    private String emailDomain;
+
     @Column(name = "created_date")
     private LocalDateTime createdDate = LocalDateTime.now();
 }

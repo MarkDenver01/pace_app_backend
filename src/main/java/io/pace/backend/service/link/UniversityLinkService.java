@@ -1,7 +1,9 @@
 package io.pace.backend.service.link;
 
+import io.pace.backend.domain.model.entity.Admin;
 import io.pace.backend.domain.model.entity.University;
 import io.pace.backend.domain.model.entity.UniversityLink;
+import io.pace.backend.repository.AdminRepository;
 import io.pace.backend.repository.UniversityLinkRepository;
 import io.pace.backend.repository.UniversityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class UniversityLinkService {
     @Autowired
     UniversityLinkRepository universityLinkRepository;
 
+    @Autowired
+    AdminRepository adminRepository;
+
     private final SecureRandom random = new SecureRandom();
 
     @Value("${app.base.frontend.installed}")
@@ -32,12 +37,16 @@ public class UniversityLinkService {
         University university = universityRepository.findById(Math.toIntExact(universityId))
                 .orElseThrow(() -> new IllegalArgumentException("University not found"));
 
+        Admin admin = adminRepository.findByUniversity_UniversityId(universityId).orElse(null);
+        String emailDomain = admin != null ? admin.getEmailDomain() : "@gmail.com";
+
         return universityLinkRepository.findByUniversityUniversityId(universityId)
                 .orElseGet(() -> {
                     UniversityLink newLink = new UniversityLink();
                     newLink.setUniversity(university);
                     newLink.setPath("/app-link");
                     newLink.setToken(generateToken(10));
+                    newLink.setEmailDomain(emailDomain);
                     return universityLinkRepository.save(newLink);
                 });
     }
@@ -59,6 +68,11 @@ public class UniversityLinkService {
         } else {
             return notInstalledBaseUrl; // redirect to APK downloads page
         }
+    }
+
+    public String getEmailDomain(Long universityId) {
+        UniversityLink link = universityLinkRepository.findByUniversity_UniversityId(universityId);
+        return link.getEmailDomain();
     }
 
     private String generateToken(int len) {

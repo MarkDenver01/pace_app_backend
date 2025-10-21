@@ -46,6 +46,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 import java.util.*;
 
+import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
+
 @Slf4j
 @RestController
 @RequestMapping("/user")
@@ -463,6 +465,15 @@ public class  UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/public/link/email_domain")
+    public ResponseEntity<?> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
+        String emailDomain = universityLinkService.getEmailDomain(universityId);
+        if (isStringNullOrEmpty(emailDomain)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Domain email not found");
+        }
+        return ResponseEntity.ok(emailDomain);
     }
 
 
