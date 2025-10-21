@@ -19,4 +19,5 @@ public class AdminResponse {
     private Long universityId;
     private String universityName;
     private Long userId;
+    private String domainEmail;
 }

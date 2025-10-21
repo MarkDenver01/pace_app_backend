@@ -287,7 +287,8 @@ public class  UserController {
                         user.getAdmin().getUserAccountStatus(),
                         user.getAdmin().getUniversity().getUniversityId(),
                         user.getAdmin().getUniversity().getUniversityName(),
-                        user.getUserId()
+                        user.getUserId(),
+                        user.getAdmin().getEmailDomain()
                 );
             }
 
