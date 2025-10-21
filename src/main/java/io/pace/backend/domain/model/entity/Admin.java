@@ -36,9 +36,8 @@ public class Admin {
     @Column(name = "email")
     private String email;
 
-    @NotBlank
     @Size(max = 20)
-    @Column(name = "email_domain")
+    @Column(name = "email_domain", nullable = true)
     private String emailDomain;
 
     @Column(name = "created_date")
