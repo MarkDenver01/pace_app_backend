@@ -469,12 +469,13 @@ public class  UserController {
     }
 
     @GetMapping("/public/link/email_domain")
-    public ResponseEntity<?> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
-        String emailDomain = universityLinkService.getEmailDomain(universityId);
-        if (isStringNullOrEmpty(emailDomain)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Domain email not found");
+    public ResponseEntity<Map<String, String>> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
+        String domainEmail = universityLinkService.getEmailDomain(universityId);
+        if (domainEmail == null || domainEmail.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "University domain email not found"));
         }
-        return ResponseEntity.ok(emailDomain);
+        return ResponseEntity.ok(Map.of("domainEmail", domainEmail));
     }
 
 
