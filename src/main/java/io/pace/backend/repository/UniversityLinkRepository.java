@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface UniversityLinkRepository extends JpaRepository<UniversityLink, Long> {
     Optional<UniversityLink> findByUniversityUniversityId(Long universityUniversityId);
 
+    Optional<UniversityLink> findByUniversityUniversityIdAndToken(Long universityId, String token);
+
     Optional<UniversityLink> findByToken(String token);
     UniversityLink findByUniversity_UniversityId(Long universityId);
 }

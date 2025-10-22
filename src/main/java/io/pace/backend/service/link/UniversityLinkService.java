@@ -51,6 +51,11 @@ public class UniversityLinkService {
                 });
     }
 
+    public boolean validateToken(Long universityId, String token) {
+        return universityLinkRepository.findByUniversityUniversityIdAndToken(universityId, token)
+                .isPresent();
+    }
+
     public UniversityLink updateToken(Long universityId) {
         UniversityLink link = universityLinkRepository.findByUniversityUniversityId(universityId)
                 .orElseThrow(() -> new IllegalArgumentException("Dynamic link not found for this university"));

@@ -468,6 +468,22 @@ public class  UserController {
         }
     }
 
+    @GetMapping("/public/dynamic_link/validate")
+    public ResponseEntity<UniversityLinkResponse> validateLink(@RequestParam("universityId") Long universityId,
+                                                               @RequestParam("token") String token) {
+        try {
+            boolean isValid = universityLinkService.validateToken(
+                    universityId, token);
+            String message = (isValid ? "success" : "failed");
+            return ResponseEntity.status(isValid ? HttpStatus.OK : HttpStatus.NOT_FOUND)
+                    .body(new UniversityLinkResponse(message));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/public/link/email_domain")
     public ResponseEntity<Map<String, String>> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
         String domainEmail = universityLinkService.getEmailDomain(universityId);
