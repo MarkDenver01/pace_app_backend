@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Properties;
 
@@ -23,6 +24,8 @@ public class GmailService {
 
     @Value("${base.url.react}")
     private String baseUrl;
+
+    private static final SecureRandom random = new SecureRandom();
 
     // Common method to send any message via Gmail API
     private void sendMessage(String to, String subject, String text) {
@@ -68,5 +71,21 @@ public class GmailService {
         String text = "Hello " + userName + ", \n\nYour account has been verified.\n" +
                 "You can now log in.";
         sendMessage(to, subject, text);
+    }
+
+    public void sendVerificationCode(String to, String verificationCode) {
+        String subject = "[PACE] ACCOUNT VERIFICATION";
+        String text = "Thanks for registering the account, your registration is successful." +
+                "\nTo complete the activation process, just enter the verification code below on the mobile app." +
+                "\nVERIFICATION CODE: " + verificationCode;
+        sendMessage(to, subject, text);
+    }
+
+    public String generateVerificationCode() {
+        // Generate a number between 0 and 9999
+        int code = random.nextInt(10000);
+
+        // Format it to always be 4 digits (e.g., 0057, 0423)
+        return String.format("%04d", code);
     }
 }

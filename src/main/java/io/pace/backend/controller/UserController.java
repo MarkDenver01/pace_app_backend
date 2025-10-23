@@ -141,6 +141,18 @@ public class  UserController {
         }
     }
 
+    @PutMapping("/public/account/student/validate")
+    public ResponseEntity<?> validateStudentAccount(ValidateAccountRequest request) {
+        try {
+            userService.validateStudent(request.getEmail(), request.getVerificationCode());
+            return ResponseEntity.ok(Map.of("message", "success"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/public/check/facebook_account")
     public ResponseEntity<?> getFacebookAccount(@RequestParam("accessToken") String accessToken) {
         // get email

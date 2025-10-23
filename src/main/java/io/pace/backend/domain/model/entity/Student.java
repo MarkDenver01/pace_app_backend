@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.NumberFormat;
 
 import java.time.LocalDateTime;
 
@@ -36,6 +37,10 @@ public class Student {
     @Email
     @Column(name = "email")
     private String email;
+
+    @Column(name = "verification_code")
+    @NumberFormat(style = NumberFormat.Style.NUMBER)
+    private int verificationCode;
 
     @Column(name = "requested_date")
     @JsonFormat(

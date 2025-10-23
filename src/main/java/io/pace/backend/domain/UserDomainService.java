@@ -39,6 +39,8 @@ public interface UserDomainService {
 
     Student approvedStudent(String email, AccountStatus accountStatus);
 
+    Student validateStudent(String email, int verificationCode);
+
     boolean isUniversityExists(Long universityId);
 
     boolean isExistByEmailAndUniversity(String email, Long universityId);
