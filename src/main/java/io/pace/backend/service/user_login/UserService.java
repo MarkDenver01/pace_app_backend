@@ -270,13 +270,15 @@ public class UserService implements UserDomainService {
                 .findByEmailAndUserAccountStatusAndVerificationCode(email, AccountStatus.PENDING, verificationCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
 
+        // send an email
+        emailService.sendVerificationCode(email, emailService.generateVerificationCode());
+
         // update verification code
         student.setVerificationCode(verificationCode);
 
-        // send an email
-        emailService.sendVerificationCode(email, emailService.generateVerificationCode());
         return studentRepository.save(student);
     }
+
 
     @Override
     public boolean isUniversityExists(Long universityId) {

@@ -74,7 +74,7 @@ public class GmailService {
     }
 
     public void sendVerificationCode(String to, String verificationCode) {
-        String subject = "[PACE] ACCOUNT VERIFICATION";
+        String subject = "ACCOUNT VERIFICATION";
         String text = "Thanks for registering the account, your registration is successful." +
                 "\nTo complete the activation process, just enter the verification code below on the mobile app." +
                 "\nVERIFICATION CODE: " + verificationCode;
