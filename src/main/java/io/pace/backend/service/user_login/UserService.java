@@ -265,7 +265,7 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public Student validateStudent(String email, int verificationCode) {
+    public Student sendVerificationCode(String email, int verificationCode) {
         Student student = studentRepository
                 .findByEmailAndUserAccountStatusAndVerificationCode(email, AccountStatus.PENDING, verificationCode)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));

@@ -46,8 +46,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 import java.util.*;
 
-import static io.pace.backend.utils.Utils.isStringNullOrEmpty;
-
 @Slf4j
 @RestController
 @RequestMapping("/user")
@@ -141,10 +139,10 @@ public class  UserController {
         }
     }
 
-    @PutMapping("/public/account/student/validate")
-    public ResponseEntity<?> validateStudentAccount(ValidateAccountRequest request) {
+    @PutMapping("/public/account/send/verification")
+    public ResponseEntity<?> sendVerificationCode(VerificationCodeRequest request) {
         try {
-            userService.validateStudent(request.getEmail(), request.getVerificationCode());
+            userService.sendVerificationCode(request.getEmail(), request.getVerificationCode());
             return ResponseEntity.ok(Map.of("message", "success"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(

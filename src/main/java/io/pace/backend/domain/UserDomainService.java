@@ -39,7 +39,7 @@ public interface UserDomainService {
 
     Student approvedStudent(String email, AccountStatus accountStatus);
 
-    Student validateStudent(String email, int verificationCode);
+    Student sendVerificationCode(String email, int verificationCode);
 
     boolean isUniversityExists(Long universityId);
 
