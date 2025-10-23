@@ -142,7 +142,7 @@ public class  UserController {
     @PutMapping("/public/account/send/verification")
     public ResponseEntity<?> sendVerificationCode(VerificationCodeRequest request) {
         try {
-            userService.sendVerificationCode(request.getEmail(), request.getVerificationCode());
+            userService.sendVerificationCode(request.getEmail());
             return ResponseEntity.ok(Map.of("message", "success"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of(

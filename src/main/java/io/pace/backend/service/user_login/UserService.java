@@ -265,16 +265,19 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public Student sendVerificationCode(String email, int verificationCode) {
+    public Student sendVerificationCode(String email) {
         Student student = studentRepository
-                .findByEmailAndUserAccountStatusAndVerificationCode(email, AccountStatus.PENDING, verificationCode)
+                .findByEmailAndUserAccountStatus(email, AccountStatus.PENDING)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
 
+        // generate verification code
+        String verificationCode = emailService.generateVerificationCode();
+
         // send an email
-        emailService.sendVerificationCode(email, emailService.generateVerificationCode());
+        emailService.sendVerificationCode(email, verificationCode);
 
         // update verification code
-        student.setVerificationCode(verificationCode);
+        student.setVerificationCode(Integer.parseInt(verificationCode));
 
         return studentRepository.save(student);
     }
