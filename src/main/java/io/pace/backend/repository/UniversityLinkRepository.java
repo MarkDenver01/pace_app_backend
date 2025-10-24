@@ -16,7 +16,5 @@ public interface UniversityLinkRepository extends JpaRepository<UniversityLink, 
     Optional<UniversityLink> findByUniversityUniversityIdAndToken(Long universityId, String token);
 
     Optional<UniversityLink> findByToken(String token);
-    UniversityLink findByUniversity_UniversityId(Long universityId);
-
-    List<UniversityLink> findAllByUniversity_UniversityId(Long universityId);
+    Optional<UniversityLink> findByUniversity_UniversityId(Long universityId);
 }

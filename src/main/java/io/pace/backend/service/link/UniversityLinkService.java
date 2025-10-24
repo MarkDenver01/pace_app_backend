@@ -35,32 +35,22 @@ public class UniversityLinkService {
     private String notInstalledBaseUrl;
 
     public UniversityLink getOrCreateLink(Long universityId) {
+        // Find the university (must exist)
         University university = universityRepository.findByUniversityId(universityId)
                 .orElseThrow(() -> new IllegalArgumentException("University not found"));
 
-        // Get the admin for that university (optional)
+        // Try to find existing link (only one per university)
+        Optional<UniversityLink> existingLink = universityLinkRepository.findByUniversity_UniversityId(universityId);
+
+        if (existingLink.isPresent()) {
+            // if already exists, return it directly
+            return existingLink.get();
+        }
+
+        // Otherwise, create new link (first-time only)
         Admin admin = adminRepository.findByUniversity_UniversityId(universityId).orElse(null);
         String emailDomain = admin != null ? admin.getEmailDomain() : "@gmail.com";
 
-        // Step 1: Find all existing links (not just one)
-        List<UniversityLink> existingLinks = universityLinkRepository.findAllByUniversity_UniversityId(universityId);
-
-        if (!existingLinks.isEmpty()) {
-            // Step 2: Handle duplicates if any exist
-            if (existingLinks.size() > 1) {
-                // Keep the first, delete the rest to maintain unique constraint
-                UniversityLink first = existingLinks.get(0);
-                for (int i = 1; i < existingLinks.size(); i++) {
-                    universityLinkRepository.delete(existingLinks.get(i));
-                }
-                return first;
-            }
-
-            // Return the single existing link
-            return existingLinks.get(0);
-        }
-
-        // Step 3: Create a new one if none exist
         UniversityLink newLink = new UniversityLink();
         newLink.setUniversity(university);
         newLink.setPath("/app-link");
@@ -95,8 +85,8 @@ public class UniversityLinkService {
     }
 
     public String getEmailDomain(Long universityId) {
-        UniversityLink link = universityLinkRepository.findByUniversity_UniversityId(universityId);
-        return link.getEmailDomain();
+        Optional<UniversityLink> link = universityLinkRepository.findByUniversity_UniversityId(universityId);
+        return link.isPresent() ? link.get().getEmailDomain() : "";
     }
 
     private String generateToken(int len) {
