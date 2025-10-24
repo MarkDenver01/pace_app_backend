@@ -12,7 +12,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "university_link")
+@Table(name = "university_link",
+        uniqueConstraints = @UniqueConstraint(columnNames = "university_id")
+
+)
 public class UniversityLink {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
