@@ -59,6 +59,10 @@ public class CourseService {
     }
 
     public CourseResponse saveCourse(CourseRequest request) {
+        if (courseRepository.existsByCourseNameIgnoreCase(request.getCourseName())) {
+            throw new IllegalArgumentException("Course with the same name already exists.");
+        }
+
         Course course = new Course();
         course.setCourseName(request.getCourseName());
         course.setCourseDescription(request.getCourseDescription());
