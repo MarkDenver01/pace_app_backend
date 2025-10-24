@@ -139,7 +139,7 @@ public class  UserController {
         }
     }
 
-    @PutMapping("/public/account/send/verification")
+    @PostMapping("/public/account/send/verification")
     public ResponseEntity<?> sendVerificationCode(VerificationCodeRequest request) {
         try {
             userService.sendVerificationCode(request.getEmail());
