@@ -17,6 +17,6 @@ public interface UniversityLinkRepository extends JpaRepository<UniversityLink, 
     Optional<UniversityLink> findByToken(String token);
     UniversityLink findByUniversity_UniversityId(Long universityId);
 
-    boolean existsByUniversity_UniversityIdAndEmailDomainIsNotNullAndEmailDomainNot(Long universityId, String emailDomain);
+    Optional<UniversityLink> findByUniversity_UniversityIdAndEmailDomainIsNotNullAndEmailDomainNot(Long universityId, String emailDomain);
 
 }

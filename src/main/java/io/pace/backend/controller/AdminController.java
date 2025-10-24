@@ -225,9 +225,10 @@ public class AdminController {
     }
 
     @GetMapping("/api/dynamic_link/email_domain")
-    public ResponseEntity<?> checkEmailDomainExists(@RequestParam("universityId") Long universityId) {
-        boolean isExist = universityLinkService.isUniversityLinkExistEmailDomain(universityId,"");
-        return ResponseEntity.ok(Map.of("message", (isExist ? "exist" : "not exist")));
+    public ResponseEntity<Map<String, String>> checkEmailDomain(@RequestParam("universityId") Long universityId) {
+        String emailDomain = universityLinkService.checkEmailDomainIsExists(universityId);
+
+        return ResponseEntity.ok(Map.of("email_domain", emailDomain));
     }
 
     @GetMapping("/api/course/active/all")
