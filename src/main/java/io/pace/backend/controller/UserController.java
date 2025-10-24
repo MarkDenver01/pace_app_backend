@@ -140,7 +140,7 @@ public class  UserController {
     }
 
     @PostMapping("/public/account/send/verification")
-    public ResponseEntity<?> sendVerificationCode(VerificationCodeRequest request) {
+    public ResponseEntity<?> sendVerificationCode(@RequestBody VerificationCodeRequest request) {
         try {
             userService.sendVerificationCode(request.getEmail());
             return ResponseEntity.ok(Map.of("message", "success"));
