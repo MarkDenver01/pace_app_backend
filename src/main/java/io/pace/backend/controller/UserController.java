@@ -140,14 +140,16 @@ public class  UserController {
     }
 
     @PostMapping("/public/account/send/verification")
-    public ResponseEntity<?> sendVerificationCode(@RequestBody VerificationCodeRequest request) {
+    public ResponseEntity<VerificationCodeResponse> sendVerificationCode(@RequestBody VerificationCodeRequest request) {
         try {
             userService.sendVerificationCode(request.getEmail());
-            return ResponseEntity.ok(Map.of("message", "success"));
+            VerificationCodeResponse verificationCodeResponse = new VerificationCodeResponse();
+            verificationCodeResponse.setMessage("success");
+            return ResponseEntity.ok(verificationCodeResponse);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "message", e.getMessage()
-            ));
+            VerificationCodeResponse verificationCodeResponse = new VerificationCodeResponse();
+            verificationCodeResponse.setMessage("error: " + e.getMessage());
+            return ResponseEntity.badRequest().body(verificationCodeResponse);
         }
     }
 
