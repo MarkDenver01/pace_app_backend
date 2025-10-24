@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,22 +35,40 @@ public class UniversityLinkService {
     private String notInstalledBaseUrl;
 
     public UniversityLink getOrCreateLink(Long universityId) {
-        University university = universityRepository.findById(Math.toIntExact(universityId))
+        University university = universityRepository.findByUniversityId(universityId)
                 .orElseThrow(() -> new IllegalArgumentException("University not found"));
 
+        // Get the admin for that university (optional)
         Admin admin = adminRepository.findByUniversity_UniversityId(universityId).orElse(null);
         String emailDomain = admin != null ? admin.getEmailDomain() : "@gmail.com";
 
-        return universityLinkRepository.findByUniversityUniversityId(universityId)
-                .orElseGet(() -> {
-                    UniversityLink newLink = new UniversityLink();
-                    newLink.setUniversity(university);
-                    newLink.setPath("/app-link");
-                    newLink.setToken(generateToken(10));
-                    newLink.setEmailDomain(emailDomain);
-                    return universityLinkRepository.save(newLink);
-                });
+        // Step 1: Find all existing links (not just one)
+        List<UniversityLink> existingLinks = universityLinkRepository.findAllByUniversity_UniversityId(universityId);
+
+        if (!existingLinks.isEmpty()) {
+            // Step 2: Handle duplicates if any exist
+            if (existingLinks.size() > 1) {
+                // Keep the first, delete the rest to maintain unique constraint
+                UniversityLink first = existingLinks.get(0);
+                for (int i = 1; i < existingLinks.size(); i++) {
+                    universityLinkRepository.delete(existingLinks.get(i));
+                }
+                return first;
+            }
+
+            // Return the single existing link
+            return existingLinks.get(0);
+        }
+
+        // Step 3: Create a new one if none exist
+        UniversityLink newLink = new UniversityLink();
+        newLink.setUniversity(university);
+        newLink.setPath("/app-link");
+        newLink.setToken(generateToken(10));
+        newLink.setEmailDomain(emailDomain);
+        return universityLinkRepository.save(newLink);
     }
+
 
     public boolean validateToken(Long universityId, String token) {
         return universityLinkRepository.findByUniversityUniversityIdAndToken(universityId, token)

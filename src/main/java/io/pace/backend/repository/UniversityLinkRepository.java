@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,6 @@ public interface UniversityLinkRepository extends JpaRepository<UniversityLink, 
 
     Optional<UniversityLink> findByToken(String token);
     UniversityLink findByUniversity_UniversityId(Long universityId);
+
+    List<UniversityLink> findAllByUniversity_UniversityId(Long universityId);
 }
