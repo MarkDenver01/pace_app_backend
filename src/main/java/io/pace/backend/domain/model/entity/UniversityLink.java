@@ -29,7 +29,7 @@ public class UniversityLink {
     private String path;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "university_id", referencedColumnName = "university_id", unique = true)
     private University university;
 
