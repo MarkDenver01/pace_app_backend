@@ -7,7 +7,6 @@ import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.email.GmailService;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -265,7 +264,7 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public Student sendVerificationCode(String email) {
+    public void sendVerificationCode(String email) {
         Student student = studentRepository
                 .findByEmailAndUserAccountStatus(email, AccountStatus.PENDING)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
@@ -279,7 +278,20 @@ public class UserService implements UserDomainService {
         // update verification code
         student.setVerificationCode(Integer.parseInt(verificationCode));
 
-        return studentRepository.save(student);
+        studentRepository.save(student);
+    }
+
+    @Override
+    public void verifyStudentAccount(String email, int verificationCode) {
+       Student student = studentRepository
+                .findByEmailAndUserAccountStatusAndVerificationCode(
+                        email,
+                        AccountStatus.PENDING,
+                        verificationCode)
+               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+       if (student != null) {
+           student.setUserAccountStatus(AccountStatus.APPROVED);
+       }
     }
 
 

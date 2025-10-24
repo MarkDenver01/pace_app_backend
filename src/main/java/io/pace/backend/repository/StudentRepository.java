@@ -19,6 +19,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByEmailAndUserAccountStatus(String email, AccountStatus accountStatus);
 
-    Optional<Student> findByEmailAndUserAccountStatusAndVerificationCode(
-            @NotBlank @Size(max = 50) @Email String email, AccountStatus userAccountStatus, int verificationCode);
+    Optional<Student> findByEmailAndUserAccountStatusAndVerificationCode(String email, AccountStatus userAccountStatus, int verificationCode);
 }

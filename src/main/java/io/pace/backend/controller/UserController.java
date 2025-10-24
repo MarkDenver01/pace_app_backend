@@ -153,6 +153,21 @@ public class  UserController {
         }
     }
 
+    @PutMapping("/public/account/verify")
+    public ResponseEntity<VerificationCodeResponse> verifyStudentAccount(@RequestParam("email") String email,
+                                                                         @RequestParam("verificationCode") int verificationCode) {
+        try {
+            userService.verifyStudentAccount(email, verificationCode);
+            VerificationCodeResponse verificationCodeResponse = new VerificationCodeResponse();
+            verificationCodeResponse.setMessage("success");
+            return ResponseEntity.ok(verificationCodeResponse);
+        } catch (RuntimeException e) {
+            VerificationCodeResponse verificationCodeResponse = new VerificationCodeResponse();
+            verificationCodeResponse.setMessage("error: " + e.getMessage());
+            return ResponseEntity.badRequest().body(verificationCodeResponse);
+        }
+    }
+
     @GetMapping("/public/check/facebook_account")
     public ResponseEntity<?> getFacebookAccount(@RequestParam("accessToken") String accessToken) {
         // get email
