@@ -34,7 +34,7 @@ public class GmailService {
             Session session = Session.getInstance(props, null);
 
             MimeMessage email = new MimeMessage(session);
-            email.setFrom(new InternetAddress("me")); // Gmail API uses "me"
+            email.setFrom(new InternetAddress("me", "PACE ADMIN")); // Gmail API uses "me"
             email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(to));
             email.setSubject(subject);
             email.setText(text);
