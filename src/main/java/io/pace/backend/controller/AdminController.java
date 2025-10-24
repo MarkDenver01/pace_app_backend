@@ -227,7 +227,7 @@ public class AdminController {
     @GetMapping("/api/link/email_domain")
     public ResponseEntity<Map<String, String>> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
         String domainEmail = universityLinkService.getEmailDomain(universityId);
-        return ResponseEntity.ok(Map.of("message", (domainEmail.isEmpty() ? "" : domainEmail)));
+        return ResponseEntity.ok(Map.of("emailDomain", domainEmail != null ? domainEmail : ""));
     }
 
     @GetMapping("/api/course/active/all")
