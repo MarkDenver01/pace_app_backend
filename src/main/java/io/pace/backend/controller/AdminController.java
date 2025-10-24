@@ -224,11 +224,10 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/dynamic_link/email_domain")
-    public ResponseEntity<Map<String, String>> checkEmailDomain(@RequestParam("universityId") Long universityId) {
-        String emailDomain = universityLinkService.checkEmailDomainIsExists(universityId);
-
-        return ResponseEntity.ok(Map.of("email_domain", emailDomain));
+    @GetMapping("/api/link/email_domain")
+    public ResponseEntity<Map<String, String>> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
+        String domainEmail = universityLinkService.getEmailDomain(universityId);
+        return ResponseEntity.ok(Map.of("message", (domainEmail.isEmpty() ? "" : domainEmail)));
     }
 
     @GetMapping("/api/course/active/all")
