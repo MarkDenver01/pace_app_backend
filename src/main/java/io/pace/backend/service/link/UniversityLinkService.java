@@ -51,6 +51,12 @@ public class UniversityLinkService {
                 });
     }
 
+    public boolean isUniversityLinkExistEmailDomain(Long universityId, String emailDomain) {
+        return universityLinkRepository.existsByUniversity_UniversityIdAndEmailDomainIsNotNullAndEmailDomainNot(
+                universityId, emailDomain
+        );
+    }
+
     public boolean validateToken(Long universityId, String token) {
         return universityLinkRepository.findByUniversityUniversityIdAndToken(universityId, token)
                 .isPresent();

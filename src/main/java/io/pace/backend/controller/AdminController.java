@@ -14,6 +14,7 @@ import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.course.UniversityCourseService;
 import io.pace.backend.service.customization.CustomizationService;
 import io.pace.backend.service.email.GmailService;
+import io.pace.backend.service.link.UniversityLinkService;
 import io.pace.backend.service.user_login.UserService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
@@ -70,6 +71,9 @@ public class AdminController {
 
     @Autowired
     UniversityCourseService universityCourseService;
+
+    @Autowired
+    UniversityLinkService universityLinkService;
 
     @Autowired
     AuthUtil authUtil;
@@ -218,6 +222,12 @@ public class AdminController {
     public ResponseEntity<CustomizationResponse> getTheme(@PathVariable Long universityId) {
         CustomizationResponse response = customizationService.getTheme(universityId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/dynamic_link/email_domain")
+    public ResponseEntity<?> checkEmailDomainExists(@RequestParam("universityId") Long universityId) {
+        boolean isExist = universityLinkService.isUniversityLinkExistEmailDomain(universityId,"");
+        return ResponseEntity.ok(Map.of("message", (isExist ? "exist" : "not exist")));
     }
 
     @GetMapping("/api/course/active/all")
