@@ -27,9 +27,10 @@ public class GmailAuth {
         var flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
 
-        var receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 
         System.out.println("Tokens stored successfully in: " + Paths.get("tokens").toAbsolutePath());

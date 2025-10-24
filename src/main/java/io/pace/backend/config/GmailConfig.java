@@ -51,6 +51,7 @@ public class GmailConfig {
                 httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
 
         // Render doesn’t support interactive login, so token must already exist in tokens directory
