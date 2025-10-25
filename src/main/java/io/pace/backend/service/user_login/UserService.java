@@ -289,9 +289,8 @@ public class UserService implements UserDomainService {
                         AccountStatus.PENDING,
                         verificationCode)
                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-       if (student != null) {
-           student.setUserAccountStatus(AccountStatus.APPROVED);
-       }
+       student.setUserAccountStatus(AccountStatus.APPROVED);
+       studentRepository.save(student);
     }
 
 
