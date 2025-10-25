@@ -154,10 +154,10 @@ public class  UserController {
     }
 
     @PutMapping("/public/account/verify")
-    public ResponseEntity<VerificationCodeResponse> verifyStudentAccount(@RequestParam("email") String email,
-                                                                         @RequestParam("verificationCode") int verificationCode) {
+    public ResponseEntity<VerificationCodeResponse> verifyStudentAccount(@RequestBody VerifyAccountRequest request
+    ) {
         try {
-            userService.verifyStudentAccount(email, verificationCode);
+            userService.verifyStudentAccount(request);
             VerificationCodeResponse verificationCodeResponse = new VerificationCodeResponse();
             verificationCodeResponse.setMessage("success");
             return ResponseEntity.ok(verificationCodeResponse);

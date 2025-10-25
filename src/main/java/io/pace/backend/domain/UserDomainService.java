@@ -2,6 +2,7 @@ package io.pace.backend.domain;
 
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.model.entity.*;
+import io.pace.backend.domain.model.request.VerifyAccountRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public interface UserDomainService {
 
     void sendVerificationCode(String email);
 
-    void verifyStudentAccount(String email, int verificationCode);
+    void verifyStudentAccount(VerifyAccountRequest verifyAccountRequest);
 
     boolean isUniversityExists(Long universityId);
 

@@ -5,6 +5,7 @@ import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.UserDomainService;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.model.entity.*;
+import io.pace.backend.domain.model.request.VerifyAccountRequest;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.email.GmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -282,12 +283,12 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public void verifyStudentAccount(String email, int verificationCode) {
+    public void verifyStudentAccount(VerifyAccountRequest verifyAccountRequest) {
        Student student = studentRepository
                 .findByEmailAndUserAccountStatusAndVerificationCode(
-                        email,
+                        verifyAccountRequest.getEmail(),
                         AccountStatus.PENDING,
-                        verificationCode)
+                        verifyAccountRequest.getVerificationCode())
                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
        student.setUserAccountStatus(AccountStatus.APPROVED);
        studentRepository.save(student);
