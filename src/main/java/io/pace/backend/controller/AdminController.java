@@ -21,6 +21,7 @@ import io.pace.backend.utils.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -123,8 +124,8 @@ public class AdminController {
     }
 
     @GetMapping("/api/get_all_students")
-    public ResponseEntity<List<StudentResponse>> getAllStudents() {
-        List<Student> students = userService.getAllStudents();
+    public ResponseEntity<List<StudentResponse>> getAllStudents(@RequestParam("universityId") Long universityId) {
+        List<Student> students = userService.getAllStudentsByUniversityId(universityId);
 
         List<StudentResponse> studentResponses = students.stream()
                 .map(student -> new StudentResponse(

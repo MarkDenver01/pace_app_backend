@@ -17,7 +17,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     List<Student> findByUserAccountStatus(AccountStatus accountStatus); // 0 = pending, 1 = approved
 
+    List<Student> findStudent_ByUniversity_UniversityId(Long universityId);
+
     Optional<Student> findByEmailAndUserAccountStatus(String email, AccountStatus accountStatus);
+
 
     Optional<Student> findByEmailAndUserAccountStatusAndVerificationCode(String email, AccountStatus userAccountStatus, int verificationCode);
 }

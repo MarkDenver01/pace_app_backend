@@ -240,6 +240,11 @@ public class UserService implements UserDomainService {
     }
 
     @Override
+    public List<Student> getAllStudentsByUniversityId(Long universityId) {
+        return studentRepository.findStudent_ByUniversity_UniversityId(universityId);
+    }
+
+    @Override
     public List<Admin> getAllAdmin() {
         return adminRepository.findAll();
     }

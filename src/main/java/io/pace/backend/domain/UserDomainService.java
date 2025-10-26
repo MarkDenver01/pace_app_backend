@@ -32,6 +32,8 @@ public interface UserDomainService {
 
     List<Student> getAllStudents();
 
+    List<Student> getAllStudentsByUniversityId(Long universityId);
+
     List<Admin> getAllAdmin();
 
     Optional<Admin> findAdminByIdAndStatus(Long adminId, AccountStatus status);
