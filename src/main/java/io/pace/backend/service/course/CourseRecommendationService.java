@@ -1,10 +1,13 @@
 package io.pace.backend.service.course;
 
+import io.pace.backend.domain.model.entity.Career;
 import io.pace.backend.domain.model.entity.Course;
 import io.pace.backend.domain.model.entity.Questions;
 import io.pace.backend.domain.model.request.AnsweredQuestionRequest;
 import io.pace.backend.domain.model.response.CourseMatchResponse;
+import io.pace.backend.repository.CareerRepository;
 import io.pace.backend.repository.CourseRepository;
+import io.pace.backend.service.career.CareerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,16 @@ public class CourseRecommendationService {
     @Autowired
     private final CourseRepository courseRepository;
 
+    @Autowired
+    private final CareerRepository careerRepository;
+
     public List<CourseMatchResponse> getTopCourses(List<AnsweredQuestionRequest> answeredQuestions) {
+        // Map<QuestionId, Answer>
         Map<Long, String> answerMap = answeredQuestions.stream()
-                .collect(Collectors.toMap(AnsweredQuestionRequest::getQuestionId, AnsweredQuestionRequest::getAnswer));
+                .collect(Collectors.toMap(
+                        AnsweredQuestionRequest::getQuestionId,
+                        AnsweredQuestionRequest::getAnswer
+                ));
 
         List<Course> activeCourses = courseRepository.findByStatusIgnoreCase("ACTIVE");
 
@@ -33,6 +43,7 @@ public class CourseRecommendationService {
         for (Course course : activeCourses) {
             List<Questions> courseQuestions = course.getQuestions();
             long total = courseQuestions.size();
+
             long yesCount = courseQuestions.stream()
                     .filter(q -> "Yes".equalsIgnoreCase(answerMap.get(q.getQuestionId())))
                     .count();
@@ -41,12 +52,19 @@ public class CourseRecommendationService {
 
             String message = getRecommendationMessage(percentage, course.getCourseName());
 
+            // Fetch possible careers from existing Career table
+            List<String> possibleCareers = careerRepository.findByCourse_CourseId(course.getCourseId())
+                    .stream()
+                    .map(Career::getCareer)
+                    .collect(Collectors.toList());
+
             scoredCourses.add(new CourseMatchResponse(
                     course.getCourseId(),
                     course.getCourseName(),
                     course.getCourseDescription(),
                     percentage,
-                    message
+                    message,
+                    possibleCareers
             ));
         }
 
