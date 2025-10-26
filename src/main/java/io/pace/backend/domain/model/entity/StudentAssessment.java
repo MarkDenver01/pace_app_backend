@@ -59,7 +59,7 @@ public class StudentAssessment {
     @JoinColumn(name = "university_id", nullable = false)
     private University university;
 
-    @OneToMany(mappedBy = "student_assessment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "studentAssessment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<RecommendedCourses> recommendedCourses = new ArrayList<>();
 }
