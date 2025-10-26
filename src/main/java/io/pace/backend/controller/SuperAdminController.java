@@ -424,11 +424,16 @@ public class SuperAdminController {
      * Example: POST /api/careers?courseId=1&careerName=Software Engineer
      */
     @PostMapping("/api/careers")
-    public ResponseEntity<Career> createCareer(
+    public ResponseEntity<CareerResponse> createCareer(
             @RequestParam Long courseId,
             @RequestParam String careerName) {
         Career createdCareer = careerService.createCareer(courseId, careerName);
-        return ResponseEntity.ok(createdCareer);
+        CareerResponse careerResponse = new CareerResponse(
+                createdCareer.getCareerId(),
+                createdCareer.getCareer(),
+                createdCareer.getCourse().getCourseId()
+        );
+        return ResponseEntity.ok(careerResponse);
     }
 
     /**
@@ -436,9 +441,14 @@ public class SuperAdminController {
      * Example: GET /api/careers/5
      */
     @GetMapping("/api/careers/{careerId}")
-    public ResponseEntity<Career> getCareerById(@PathVariable Long careerId) {
+    public ResponseEntity<CareerResponse> getCareerById(@PathVariable Long careerId) {
         Career career = careerService.getCareerById(careerId);
-        return ResponseEntity.ok(career);
+        CareerResponse careerResponse = new CareerResponse(
+                career.getCareerId(),
+                career.getCareer(),
+                career.getCourse().getCourseId()
+        );
+        return ResponseEntity.ok(careerResponse);
     }
 
     /**
@@ -446,11 +456,16 @@ public class SuperAdminController {
      * Example: GET /api/careers/by-name?careerName=Developer&courseName=BSIT
      */
     @GetMapping("/api/careers/by-name")
-    public ResponseEntity<Career> getCareerByNameAndCourse(
+    public ResponseEntity<CareerResponse> getCareerByNameAndCourse(
             @RequestParam String careerName,
             @RequestParam String courseName) {
         Career career = careerService.getCareerByNameAndCourseName(careerName, courseName);
-        return ResponseEntity.ok(career);
+        CareerResponse careerResponse = new CareerResponse(
+                career.getCareerId(),
+                career.getCareer(),
+                career.getCourse().getCourseId()
+        );
+        return ResponseEntity.ok(careerResponse);
     }
 
     /**
@@ -458,11 +473,16 @@ public class SuperAdminController {
      * Example: GET /api/careers/by-id-course?careerId=2&courseName=BSIT
      */
     @GetMapping("/api/career/by-id-course")
-    public ResponseEntity<Career> getCareerByIdAndCourseName(
+    public ResponseEntity<CareerResponse> getCareerByIdAndCourseName(
             @RequestParam Long careerId,
             @RequestParam String courseName) {
         Career career = careerService.getCareerByIdAndCourseName(careerId, courseName);
-        return ResponseEntity.ok(career);
+        CareerResponse careerResponse = new CareerResponse(
+                career.getCareerId(),
+                career.getCareer(),
+                career.getCourse().getCourseId()
+        );
+        return ResponseEntity.ok(careerResponse);
     }
 
     /**
@@ -470,9 +490,18 @@ public class SuperAdminController {
      * Example: GET /api/careers/by-course/1
      */
     @GetMapping("/api/careers/by-course/{courseId}")
-    public ResponseEntity<List<Career>> getCareersByCourseId(@PathVariable Long courseId) {
+    public ResponseEntity<List<CareerResponse>> getCareersByCourseId(@PathVariable Long courseId) {
         List<Career> careers = careerService.getCareersByCourseId(courseId);
-        return ResponseEntity.ok(careers);
+
+        List<CareerResponse> careerResponses = careers.stream()
+                .map(career -> new CareerResponse(
+                        career.getCareerId(),
+                        career.getCareer(),
+                        career.getCourse() != null ? career.getCourse().getCourseId() : null
+                ))
+                .toList();
+
+        return ResponseEntity.ok(careerResponses);
     }
 
     /**
