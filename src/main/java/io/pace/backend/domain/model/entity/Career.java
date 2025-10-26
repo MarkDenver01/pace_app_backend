@@ -32,7 +32,7 @@ public class Career {
     private Course course;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "recommended_course_id")
     @JsonBackReference
     private RecommendedCourses recommendedCourses;
 }

@@ -19,7 +19,7 @@ import java.util.List;
 public class RecommendedCourses {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "course_id")
+    @Column(name = "recommended_course_id")
     private Long courseId;
 
     @NotBlank(message = "Career description is required")
@@ -37,7 +37,7 @@ public class RecommendedCourses {
     @JsonBackReference
     private StudentAssessment studentAssessment;
 
-    @OneToMany(mappedBy = "recommended_courses", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "recommendedCourses", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Career> careers = new ArrayList<>();
 }
