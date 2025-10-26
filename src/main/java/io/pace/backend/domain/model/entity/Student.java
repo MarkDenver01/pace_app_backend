@@ -26,7 +26,6 @@ public class Student {
     @Column(name = "student_id")
     private Long studentId;
 
-
     @NotBlank
     @Size(max = 20)
     @Column(name = "username")

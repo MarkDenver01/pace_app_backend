@@ -30,4 +30,9 @@ public class Career {
     @JoinColumn(name = "course_id")
     @JsonBackReference
     private Course course;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    @JsonBackReference
+    private RecommendedCourses recommendedCourses;
 }

@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface StudentAssessmentRepository extends JpaRepository<StudentAssessment, Long> {
     long countByUniversity_UniversityId(Long universityId);
 
-    long countByUniversity_UniversityIdAndRecommendedCourse_CourseId(Long universityId, Long courseId);
+    boolean existsByEmail(String email);
 }
