@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AssessmentService {
@@ -95,6 +96,17 @@ public class AssessmentService {
                 savedStudent.getCreatedDateTime(),
                 savedStudent.getAssessmentStatus(),
                 recommendedCourseResponses
+        );
+    }
+
+    public Map<String, Long> getAssessmentStats(Long universityId, Long courseId) {
+        long total = studentAssessmentRepository.countByUniversity_UniversityId(universityId);
+        long assessed = studentAssessmentRepository
+                .countByUniversity_UniversityIdAndRecommendedCourses_CourseId(universityId, courseId);
+
+        return Map.of(
+                "assessed", assessed,
+                "total", total
         );
     }
 }

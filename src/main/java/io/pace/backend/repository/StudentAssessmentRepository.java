@@ -9,4 +9,6 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     long countByUniversity_UniversityId(Long universityId);
 
     boolean existsByEmail(String email);
+
+    long countByUniversity_UniversityIdAndRecommendedCourses_CourseId(Long universityId, Long courseId);
 }
