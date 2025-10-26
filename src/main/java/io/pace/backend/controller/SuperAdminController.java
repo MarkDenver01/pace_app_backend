@@ -11,6 +11,7 @@ import io.pace.backend.domain.model.request.UniversityRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.assessment.AssessmentService;
+import io.pace.backend.service.career.CareerService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.course.UniversityCourseService;
 import io.pace.backend.service.email.GmailService;
@@ -46,6 +47,9 @@ public class SuperAdminController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    CareerService careerService;
 
     @Autowired
     QuestionService questionService;
@@ -412,5 +416,72 @@ public class SuperAdminController {
         ex.getBindingResult().getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+
+    /**
+     * Create a new career under a given course.
+     * Example: POST /api/careers?courseId=1&careerName=Software Engineer
+     */
+    @PostMapping("/api/careers")
+    public ResponseEntity<Career> createCareer(
+            @RequestParam Long courseId,
+            @RequestParam String careerName) {
+        Career createdCareer = careerService.createCareer(courseId, careerName);
+        return ResponseEntity.ok(createdCareer);
+    }
+
+    /**
+     * Get a career by its ID.
+     * Example: GET /api/careers/5
+     */
+    @GetMapping("/api/careers/{careerId}")
+    public ResponseEntity<Career> getCareerById(@PathVariable Long careerId) {
+        Career career = careerService.getCareerById(careerId);
+        return ResponseEntity.ok(career);
+    }
+
+    /**
+     * Get a career by name and course name.
+     * Example: GET /api/careers/by-name?careerName=Developer&courseName=BSIT
+     */
+    @GetMapping("/api/careers/by-name")
+    public ResponseEntity<Career> getCareerByNameAndCourse(
+            @RequestParam String careerName,
+            @RequestParam String courseName) {
+        Career career = careerService.getCareerByNameAndCourseName(careerName, courseName);
+        return ResponseEntity.ok(career);
+    }
+
+    /**
+     * Get a career by ID and course name.
+     * Example: GET /api/careers/by-id-course?careerId=2&courseName=BSIT
+     */
+    @GetMapping("/api/career/by-id-course")
+    public ResponseEntity<Career> getCareerByIdAndCourseName(
+            @RequestParam Long careerId,
+            @RequestParam String courseName) {
+        Career career = careerService.getCareerByIdAndCourseName(careerId, courseName);
+        return ResponseEntity.ok(career);
+    }
+
+    /**
+     * Get all careers under a specific course.
+     * Example: GET /api/careers/by-course/1
+     */
+    @GetMapping("/api/careers/by-course/{courseId}")
+    public ResponseEntity<List<Career>> getCareersByCourseId(@PathVariable Long courseId) {
+        List<Career> careers = careerService.getCareersByCourseId(courseId);
+        return ResponseEntity.ok(careers);
+    }
+
+    /**
+     * Delete a career by ID.
+     * Example: DELETE /api/careers/3
+     */
+    @DeleteMapping("/api/careers/{careerId}")
+    public ResponseEntity<Void> deleteCareer(@PathVariable Long careerId) {
+        careerService.deleteCareer(careerId);
+        return ResponseEntity.noContent().build();
     }
 }
