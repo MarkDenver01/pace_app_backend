@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AssessmentService {
@@ -108,5 +109,33 @@ public class AssessmentService {
                 "assessed", assessed,
                 "total", total
         );
+    }
+
+    public StudentAssessmentResponse getStudentAssessment(Long universityId, String assessmentStatus, String email) {
+        return studentAssessmentRepository
+                .findByUniversity_UniversityIdAndAssessmentStatusAndEmail(universityId, assessmentStatus, email)
+                .map(student -> new StudentAssessmentResponse(
+                        student.getStudentId(),
+                        student.getUserName(),
+                        student.getEmail(),
+                        student.getEnrollmentStatus(),
+                        student.getEnrolledUniversity(),
+                        student.getUniversity() != null ? student.getUniversity().getUniversityId() : null,
+                        student.getCreatedDateTime(),
+                        student.getAssessmentStatus(),
+                        student.getRecommendedCourses().stream().map(rc -> new RecommendedCourseResponse(
+                                rc.getCourseId(),
+                                rc.getCourseDescription(),
+                                rc.getAssessmentResult(),
+                                rc.getResultDescription(),
+                                rc.getStudentAssessment() != null ? rc.getStudentAssessment().getStudentId() : null,
+                                rc.getCareers().stream().map(c -> new CareerResponse(
+                                        c.getCareerId(),
+                                        c.getCareer(),
+                                        c.getCourse() != null ? c.getCourse().getCourseId() : null
+                                )).toList()
+                        )).toList()
+                ))
+                .orElseThrow(() -> new RuntimeException("Student assessment not found"));
     }
 }

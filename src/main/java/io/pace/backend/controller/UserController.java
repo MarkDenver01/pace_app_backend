@@ -534,4 +534,19 @@ public class  UserController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/api/student_assessment/get")
+    public ResponseEntity<StudentAssessmentResponse> getStudentAssessment(
+            @RequestParam("universityId")  Long universityId,
+            @RequestParam("assessmentStatus") String assessmentStatus,
+            @RequestParam("email") String email
+    ) {
+        try {
+            StudentAssessmentResponse response = assessmentService
+                    .getStudentAssessment(universityId, assessmentStatus, email);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
