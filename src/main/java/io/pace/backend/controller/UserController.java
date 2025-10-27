@@ -536,7 +536,7 @@ public class  UserController {
     }
 
     @GetMapping("/api/student_assessment/get")
-    public ResponseEntity<StudentAssessmentResponse> getStudentAssessment(
+    public ResponseEntity<?> getStudentAssessment(
             @RequestParam("universityId")  Long universityId,
             @RequestParam("email") String email
     ) {
@@ -545,7 +545,8 @@ public class  UserController {
                     .getStudentAssessment(universityId, email);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
