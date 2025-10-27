@@ -111,9 +111,9 @@ public class AssessmentService {
         );
     }
 
-    public StudentAssessmentResponse getStudentAssessment(Long universityId, String assessmentStatus, String email) {
+    public StudentAssessmentResponse getStudentAssessment(Long universityId, String email) {
         return studentAssessmentRepository
-                .findByUniversity_UniversityIdAndAssessmentStatusAndEmail(universityId, assessmentStatus, email)
+                .findByUniversity_UniversityIdAndAndEmail(universityId, email)
                 .map(student -> new StudentAssessmentResponse(
                         student.getStudentId(),
                         student.getUserName(),
