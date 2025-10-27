@@ -54,10 +54,10 @@ public class AssessmentService {
                     recommendedCourses.setStudentAssessment(studentAssessment);
 
                     // Map Careers
-                    List<Career> careerList = rcReq.getCareers()
+                    List<RecommendedCareer> careerList = rcReq.getCareers()
                             .stream()
                             .map(cReq -> {
-                                Career career = new Career();
+                                RecommendedCareer career = new RecommendedCareer();
                                 career.setCareer(cReq.getCareerName());
                                 career.setRecommendedCourses(recommendedCourses);
                                 return career;
@@ -83,7 +83,7 @@ public class AssessmentService {
                         savedStudent.getStudentId(),
                         rc.getCareers()
                                 .stream()
-                                .map(c -> new CareerResponse(c.getCareerId(), c.getCareer(), rc.getCourseId()))
+                                .map(c -> new CareerResponse(c.getCareerId(), c.getCareer()))
                                 .toList()
                 ))
                 .toList();
@@ -132,8 +132,7 @@ public class AssessmentService {
                                 rc.getStudentAssessment() != null ? rc.getStudentAssessment().getStudentId() : null,
                                 rc.getCareers().stream().map(c -> new CareerResponse(
                                         c.getCareerId(),
-                                        c.getCareer(),
-                                        c.getCourse() != null ? c.getCourse().getCourseId() : null
+                                        c.getCareer()
                                 )).toList()
                         )).toList()
                 ))

@@ -8,5 +8,4 @@ import lombok.Data;
 public class CareerResponse {
     private Long careerId;
     private String careerName;
-    private Long courseId;
 }
