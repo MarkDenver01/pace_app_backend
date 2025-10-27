@@ -25,6 +25,7 @@ import io.pace.backend.service.user_login.instagram.InstagramAuthService;
 import io.pace.backend.service.user_login.twitter.TwitterAuthService;
 import io.pace.backend.utils.AuthUtil;
 import io.pace.backend.utils.JwtUtils;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,6 +5,7 @@ import io.pace.backend.domain.model.request.StudentAssessmentRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.StudentAssessmentRepository;
 import io.pace.backend.repository.UniversityRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -113,7 +114,7 @@ public class AssessmentService {
 
     public StudentAssessmentResponse getStudentAssessment(Long universityId, String email) {
         return studentAssessmentRepository
-                .findByUniversity_UniversityIdAndAndEmail(universityId, email)
+                .findByUniversity_UniversityIdAndEmail(universityId, email)
                 .map(student -> new StudentAssessmentResponse(
                         student.getStudentId(),
                         student.getUserName(),
@@ -136,6 +137,6 @@ public class AssessmentService {
                                 )).toList()
                         )).toList()
                 ))
-                .orElseThrow(() -> new RuntimeException("Student assessment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Student assessment not found"));
     }
 }
