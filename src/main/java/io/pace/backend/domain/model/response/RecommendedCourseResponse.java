@@ -13,5 +13,5 @@ public class RecommendedCourseResponse {
     private double assessmentResult;
     private String resultDescription;
     private Long studentId;
-    private List<CareerResponse> careers;
+    private List<RecommendedCareerResponse> careers;
 }

@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CareerResponse {
+public class RecommendedCareerResponse {
     private Long careerId;
     private String careerName;
-    private Long courseId;
 }

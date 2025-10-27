@@ -83,7 +83,7 @@ public class AssessmentService {
                         savedStudent.getStudentId(),
                         rc.getCareers()
                                 .stream()
-                                .map(c -> new CareerResponse(c.getCareerId(), c.getCareer()))
+                                .map(c -> new RecommendedCareerResponse(c.getCareerId(), c.getCareer()))
                                 .toList()
                 ))
                 .toList();
@@ -130,7 +130,7 @@ public class AssessmentService {
                                 rc.getAssessmentResult(),
                                 rc.getResultDescription(),
                                 rc.getStudentAssessment() != null ? rc.getStudentAssessment().getStudentId() : null,
-                                rc.getCareers().stream().map(c -> new CareerResponse(
+                                rc.getCareers().stream().map(c -> new RecommendedCareerResponse(
                                         c.getCareerId(),
                                         c.getCareer()
                                 )).toList()
