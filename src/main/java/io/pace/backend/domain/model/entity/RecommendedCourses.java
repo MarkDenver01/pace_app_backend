@@ -39,5 +39,5 @@ public class RecommendedCourses {
 
     @OneToMany(mappedBy = "recommendedCourses", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Career> careers = new ArrayList<>();
+    private List<RecommendedCareer> careers = new ArrayList<>();
 }
