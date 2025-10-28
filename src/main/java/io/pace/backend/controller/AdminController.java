@@ -250,9 +250,8 @@ public class AdminController {
         return ResponseEntity.ok(courseResponses);
     }
 
-    @GetMapping("/api/student_assessment/get-all")
-    public ResponseEntity<?> getStudentAssessment(
-            @RequestParam("universityId")  Long universityId) {
+    @GetMapping("/api/student_assessment/get-all/{universityId}")
+    public ResponseEntity<?> getStudentAssessment(@PathVariable Long universityId) {
         try {
             List<StudentAssessmentResponse> response = assessmentService
                     .getAllAssessmentsByUniversity(universityId);
