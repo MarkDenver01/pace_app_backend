@@ -140,6 +140,19 @@ public class  UserController {
         }
     }
 
+    @PutMapping("/api/username/update")
+    public ResponseEntity<?> updateUserName(@RequestParam("userName") String userName, @RequestParam("email") String email) {
+        try {
+            userService.updateUserName(userName, email);
+            return ResponseEntity.ok(Map.of("message", "success"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
     @PostMapping("/public/account/send/verification")
     public ResponseEntity<VerificationCodeResponse> sendVerificationCode(@RequestBody VerificationCodeRequest request) {
         try {

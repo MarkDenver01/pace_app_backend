@@ -53,4 +53,6 @@ public interface UserDomainService {
     boolean isGoogleAccountExists(String email);
 
     boolean isFacebookAccountExists(String email);
+
+    void updateUserName(String userName, String email);
 }

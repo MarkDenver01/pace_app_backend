@@ -320,5 +320,14 @@ public class UserService implements UserDomainService {
         return userRepository.existsByEmailAndSignupMethod(email, "facebook");
     }
 
+    @Override
+    public void updateUserName(String userName, String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+
+        student.setUserName(userName);
+        studentRepository.save(student);
+    }
+
 
 }
