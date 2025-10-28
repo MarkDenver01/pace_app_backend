@@ -301,6 +301,12 @@ public class AdminController {
         return assessmentService.getDailyAssessmentCountForUniversity(universityId);
     }
 
+    @GetMapping("/api/same-school/{universityId}/analytics")
+    public List<DailySameSchoolCountResponse> getDailySameSchoolCount(
+            @PathVariable Long universityId) {
+        return assessmentService.getDailySameSchoolCount(universityId);
+    }
+
 }
 
 

@@ -74,4 +74,19 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
             @Param("endDate") LocalDateTime endDate,
             @Param("universityId") Long universityId
     );
+
+    @Query("""
+       SELECT FUNCTION('DATE', sa.createdDateTime) AS date, COUNT(sa) AS count
+       FROM StudentAssessment sa
+       WHERE sa.createdDateTime BETWEEN :startDate AND :endDate
+         AND sa.university.universityId = :universityId
+         AND LOWER(sa.enrollmentStatus) = 'same school'
+       GROUP BY FUNCTION('DATE', sa.createdDateTime)
+       ORDER BY FUNCTION('DATE', sa.createdDateTime)
+       """)
+    List<Object[]> countSameSchoolStudentsByDate(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("universityId") Long universityId
+    );
 }

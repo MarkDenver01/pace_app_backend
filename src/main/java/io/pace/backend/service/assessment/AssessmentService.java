@@ -258,5 +258,28 @@ public class AssessmentService {
                 .collect(Collectors.toList());
     }
 
+    public List<DailySameSchoolCountResponse> getDailySameSchoolCount(Long universityId) {
+
+        // Get min and max dates
+        List<Object[]> minMaxList = studentAssessmentRepository.findMinAndMaxCreatedDateByUniversity(universityId);
+
+        if(minMaxList == null || minMaxList.isEmpty() || minMaxList.get(0)[0] == null || minMaxList.get(0)[1] == null) {
+            return List.of(); // No data
+        }
+
+        Object[] minMaxDates = minMaxList.get(0);
+        LocalDateTime start = (LocalDateTime) minMaxDates[0];
+        LocalDateTime end = (LocalDateTime) minMaxDates[1];
+
+        List<Object[]> results = studentAssessmentRepository.countSameSchoolStudentsByDate(start, end, universityId);
+
+        return results.stream()
+                .map(r -> new DailySameSchoolCountResponse(
+                        r[0].toString(),                // date (yyyy-MM-dd)
+                        ((Number) r[1]).intValue()     // count
+                ))
+                .collect(Collectors.toList());
+    }
+
 
 }
