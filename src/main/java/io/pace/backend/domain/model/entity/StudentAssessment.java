@@ -50,7 +50,7 @@ public class StudentAssessment {
 
 
     @Column(name = "created_date")
-    private String createdDateTime;
+    private LocalDateTime createdDateTime;
 
     @Column(name = "assessment_status")
     private String assessmentStatus;

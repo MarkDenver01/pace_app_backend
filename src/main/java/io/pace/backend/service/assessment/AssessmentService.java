@@ -43,7 +43,7 @@ public class AssessmentService {
         studentAssessment.setEmail(request.getEmail());
         studentAssessment.setEnrollmentStatus(request.getEnrollmentStatus());
         studentAssessment.setEnrolledUniversity(request.getEnrolledUniversity());
-        studentAssessment.setCreatedDateTime(LocalDateTime.now().toString());
+        studentAssessment.setCreatedDateTime(LocalDateTime.now());
         studentAssessment.setUniversity(university);
         studentAssessment.setAssessmentStatus(request.getAssessmentStatus());
 
@@ -99,7 +99,7 @@ public class AssessmentService {
                 savedStudent.getEnrollmentStatus(),
                 savedStudent.getEnrolledUniversity(),
                 savedStudent.getUniversity().getUniversityId(),
-                savedStudent.getCreatedDateTime(),
+                savedStudent.getCreatedDateTime().toString(),
                 savedStudent.getAssessmentStatus(),
                 recommendedCourseResponses
         );
@@ -146,7 +146,7 @@ public class AssessmentService {
                         student.getEnrollmentStatus(),
                         student.getEnrolledUniversity(),
                         student.getUniversity() != null ? student.getUniversity().getUniversityId() : null,
-                        student.getCreatedDateTime(),
+                        student.getCreatedDateTime().toString(),
                         student.getAssessmentStatus(),
                         student.getRecommendedCourses().stream().map(rc -> new RecommendedCourseResponse(
                                 rc.getCourseId(),
@@ -178,7 +178,7 @@ public class AssessmentService {
                         student.getEnrollmentStatus(),
                         student.getEnrolledUniversity(),
                         student.getUniversity() != null ? student.getUniversity().getUniversityId() : null,
-                        student.getCreatedDateTime(),
+                        student.getCreatedDateTime().toString(),
                         student.getAssessmentStatus(),
                         student.getRecommendedCourses().stream()
                                 .map(rc -> new RecommendedCourseResponse(
