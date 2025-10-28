@@ -58,7 +58,8 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     @Query("SELECT MIN(sa.createdDateTime), MAX(sa.createdDateTime) " +
             "FROM StudentAssessment sa " +
             "WHERE sa.university.universityId = :universityId")
-    Object[] findMinAndMaxCreatedDateByUniversity(@Param("universityId") Long universityId);
+    List<Object[]> findMinAndMaxCreatedDateByUniversity(@Param("universityId") Long universityId);
+
 
     @Query("""
        SELECT FUNCTION('DATE', sa.createdDateTime) AS date, COUNT(sa) AS count

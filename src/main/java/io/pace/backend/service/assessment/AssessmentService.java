@@ -237,12 +237,13 @@ public class AssessmentService {
 
     public List<DailyAssessmentCountResponse> getDailyAssessmentCountForUniversity(Long universityId) {
 
-        // Get min and max dates from DB
-        Object[] minMaxDates = studentAssessmentRepository.findMinAndMaxCreatedDateByUniversity(universityId);
+        List<Object[]> minMaxList = studentAssessmentRepository.findMinAndMaxCreatedDateByUniversity(universityId);
 
-        if(minMaxDates == null || minMaxDates[0] == null || minMaxDates[1] == null) {
+        if (minMaxList == null || minMaxList.isEmpty() || minMaxList.get(0)[0] == null || minMaxList.get(0)[1] == null) {
             return List.of(); // No data
         }
+
+        Object[] minMaxDates = minMaxList.get(0);
 
         LocalDateTime start = (LocalDateTime) minMaxDates[0];
         LocalDateTime end = (LocalDateTime) minMaxDates[1];
@@ -256,5 +257,6 @@ public class AssessmentService {
                 ))
                 .collect(Collectors.toList());
     }
+
 
 }
