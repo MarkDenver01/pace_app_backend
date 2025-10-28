@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -208,15 +209,18 @@ public class AssessmentService {
     }
 
     public List<TopCourseResponse> getTopCourses(Long universityId) {
-        LocalDate endDate = LocalDate.now(); // today
-        LocalDate startDate = endDate.minusMonths(5); // 5 months ago
+        LocalDate today = LocalDate.now();
+        LocalDate startDateLocal = today.minusMonths(5);
 
-        List<Object[]> results = studentAssessmentRepository.findTopCoursesByDateRange(universityId, startDate, endDate);
+        LocalDateTime startDateTime = startDateLocal.atStartOfDay(); // 00:00:00
+        LocalDateTime endDateTime = today.atTime(LocalTime.MAX);      // 23:59:59.999999999
 
-        // Map Object[] to DTO
+        List<Object[]> results = studentAssessmentRepository.findTopCoursesByDateRange(
+                universityId, startDateTime, endDateTime);
+
         return results.stream()
                 .map(r -> new TopCourseResponse((String) r[0], ((Long) r[1]).intValue()))
-                .limit(5) // get top 5
+                .limit(5)
                 .collect(Collectors.toList());
     }
 
