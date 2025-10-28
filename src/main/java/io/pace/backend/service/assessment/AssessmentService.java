@@ -138,4 +138,13 @@ public class AssessmentService {
                 ))
                 .orElseThrow(() -> new EntityNotFoundException("Student assessment not found"));
     }
+
+
+    public void deleteStudentAssessment(String email) {
+        StudentAssessment student = studentAssessmentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("StudentAssessment not found"));
+
+        studentAssessmentRepository.delete(student);
+
+    }
 }

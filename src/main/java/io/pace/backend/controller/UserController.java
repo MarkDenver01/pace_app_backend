@@ -550,4 +550,10 @@ public class  UserController {
         }
     }
 
+    @DeleteMapping("/api/student_assessment/delete")
+    public ResponseEntity<String> deleteStudentByEmail(@RequestParam String email) {
+        assessmentService.deleteStudentAssessment(email);
+        return ResponseEntity.ok("StudentAssessment deleted successfully by email");
+    }
+
 }
