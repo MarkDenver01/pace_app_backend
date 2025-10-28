@@ -8,6 +8,7 @@ import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.VerifyAccountRequest;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.email.GmailService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,9 @@ public class UserService implements UserDomainService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    StudentAssessmentRepository studentAssessmentRepository;
 
     @Autowired
     StudentRepository studentRepository;
@@ -114,6 +118,15 @@ public class UserService implements UserDomainService {
             admin.setEmailDomain(emailDomain);
             adminRepository.save(admin);
         });
+    }
+
+    public void updateStudentPassword(String email, String newPassword) {
+        // Fetch users or throw if none exist
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+       user.setPassword(passwordEncoder.encode(newPassword));
+       userRepository.save(user);
     }
 
 
@@ -320,13 +333,33 @@ public class UserService implements UserDomainService {
         return userRepository.existsByEmailAndSignupMethod(email, "facebook");
     }
 
+    @Transactional
     @Override
     public void updateUserName(String userName, String email) {
+        // Validate input early
+        if (userName == null || userName.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username cannot be empty.");
+        }
+
+        // Find all related entities by email
         Student student = studentRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
 
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        StudentAssessment studentAssessment = studentAssessmentRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentAssessment not found"));
+
+        // Update fields
         student.setUserName(userName);
+        user.setUserName(userName);
+        studentAssessment.setUserName(userName);
+
+        // Save all updates in one transaction
         studentRepository.save(student);
+        userRepository.save(user);
+        studentAssessmentRepository.save(studentAssessment);
     }
 
 

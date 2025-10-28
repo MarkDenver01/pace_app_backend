@@ -140,6 +140,20 @@ public class  UserController {
         }
     }
 
+    @PutMapping("/api/student/update-password")
+    public ResponseEntity<?> updateStudentPassword(@RequestParam("email") String email,
+                                                   @RequestParam("password") String password) {
+        try {
+            userService.updateStudentPassword(email, password);
+            return ResponseEntity.ok(Map.of("message", "success"));
+        }  catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", ex.getMessage()
+            ));
+        }
+    }
+
     @PutMapping("/api/username/update")
     public ResponseEntity<?> updateUserName(@RequestParam("userName") String userName, @RequestParam("email") String email) {
         try {
