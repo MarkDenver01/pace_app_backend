@@ -139,6 +139,42 @@ public class AssessmentService {
                 .orElseThrow(() -> new EntityNotFoundException("Student assessment not found"));
     }
 
+    public List<StudentAssessmentResponse> getAllAssessmentsByUniversity(Long universityId) {
+        List<StudentAssessment> assessments = studentAssessmentRepository.findByUniversity_UniversityId(universityId);
+
+        if (assessments.isEmpty()) {
+            throw new EntityNotFoundException("No student assessments found for university ID: " + universityId);
+        }
+
+        return assessments.stream()
+                .map(student -> new StudentAssessmentResponse(
+                        student.getStudentId(),
+                        student.getUserName(),
+                        student.getEmail(),
+                        student.getEnrollmentStatus(),
+                        student.getEnrolledUniversity(),
+                        student.getUniversity() != null ? student.getUniversity().getUniversityId() : null,
+                        student.getCreatedDateTime(),
+                        student.getAssessmentStatus(),
+                        student.getRecommendedCourses().stream()
+                                .map(rc -> new RecommendedCourseResponse(
+                                        rc.getCourseId(),
+                                        rc.getCourseDescription(),
+                                        rc.getAssessmentResult(),
+                                        rc.getResultDescription(),
+                                        rc.getStudentAssessment() != null ? rc.getStudentAssessment().getStudentId() : null,
+                                        rc.getCareers().stream()
+                                                .map(c -> new RecommendedCareerResponse(
+                                                        c.getCareerId(),
+                                                        c.getCareer()
+                                                ))
+                                                .toList()
+                                ))
+                                .toList()
+                ))
+                .toList();
+    }
+
 
     public void deleteStudentAssessment(String email) {
         StudentAssessment student = studentAssessmentRepository.findByEmail(email)

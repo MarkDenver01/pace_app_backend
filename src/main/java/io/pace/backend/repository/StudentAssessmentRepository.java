@@ -17,5 +17,7 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
 
     Optional<StudentAssessment> findByUniversity_UniversityIdAndEmail(Long universityUniversityId, String email);
 
+    List<StudentAssessment> findByUniversity_UniversityId(Long universityId);
+
     Optional<StudentAssessment> findByEmail(String email);
 }

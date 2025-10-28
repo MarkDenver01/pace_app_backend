@@ -10,6 +10,7 @@ import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UniversityRepository;
 import io.pace.backend.repository.UserRepository;
+import io.pace.backend.service.assessment.AssessmentService;
 import io.pace.backend.service.course.CourseService;
 import io.pace.backend.service.course.UniversityCourseService;
 import io.pace.backend.service.customization.CustomizationService;
@@ -75,6 +76,9 @@ public class AdminController {
 
     @Autowired
     UniversityLinkService universityLinkService;
+
+    @Autowired
+    AssessmentService assessmentService;
 
     @Autowired
     AuthUtil authUtil;
@@ -244,6 +248,19 @@ public class AdminController {
                 ))
                 .toList();
         return ResponseEntity.ok(courseResponses);
+    }
+
+    @GetMapping("/api/student_assessment/get-all")
+    public ResponseEntity<?> getStudentAssessment(
+            @RequestParam("universityId")  Long universityId) {
+        try {
+            List<StudentAssessmentResponse> response = assessmentService
+                    .getAllAssessmentsByUniversity(universityId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
 }
