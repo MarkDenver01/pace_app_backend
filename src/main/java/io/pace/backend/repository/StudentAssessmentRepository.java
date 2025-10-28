@@ -21,8 +21,6 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
 
     long countByUniversity_UniversityId(Long universityId);
 
-    long countStudentAssessment_UniversityId(Long universityId);
-
     // other school, new school, same school
     long countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(Long universityId, String enrollmentStatus);
 
