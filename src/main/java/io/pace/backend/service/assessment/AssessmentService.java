@@ -234,4 +234,27 @@ public class AssessmentService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    public List<DailyAssessmentCountResponse> getDailyAssessmentCountForUniversity(Long universityId) {
+
+        // Get min and max dates from DB
+        Object[] minMaxDates = studentAssessmentRepository.findMinAndMaxCreatedDateByUniversity(universityId);
+
+        if(minMaxDates == null || minMaxDates[0] == null || minMaxDates[1] == null) {
+            return List.of(); // No data
+        }
+
+        LocalDateTime start = (LocalDateTime) minMaxDates[0];
+        LocalDateTime end = (LocalDateTime) minMaxDates[1];
+
+        List<Object[]> results = studentAssessmentRepository.countAssessmentsByDateForUniversity(start, end, universityId);
+
+        return results.stream()
+                .map(r -> new DailyAssessmentCountResponse(
+                        r[0].toString(),          // date
+                        ((Number) r[1]).intValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

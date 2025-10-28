@@ -28,8 +28,6 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     // other school, new school, same school
     long countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(Long universityId, String enrollmentStatus);
 
-
-
     @Query("""
     SELECT rc.courseDescription, COUNT(sa)
     FROM StudentAssessment sa
@@ -57,4 +55,22 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     List<Object[]> findTop3CompetitorUniversitiesByUniversityId(@Param("universityId") Long universityId);
 
 
+    @Query("SELECT MIN(sa.createdDateTime), MAX(sa.createdDateTime) " +
+            "FROM StudentAssessment sa " +
+            "WHERE sa.university.universityId = :universityId")
+    Object[] findMinAndMaxCreatedDateByUniversity(@Param("universityId") Long universityId);
+
+    @Query("""
+       SELECT FUNCTION('DATE', sa.createdDateTime) AS date, COUNT(sa) AS count
+       FROM StudentAssessment sa
+       WHERE sa.createdDateTime BETWEEN :startDate AND :endDate
+         AND sa.university.universityId = :universityId
+       GROUP BY FUNCTION('DATE', sa.createdDateTime)
+       ORDER BY FUNCTION('DATE', sa.createdDateTime)
+       """)
+    List<Object[]> countAssessmentsByDateForUniversity(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("universityId") Long universityId
+    );
 }

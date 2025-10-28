@@ -295,6 +295,12 @@ public class AdminController {
         return assessmentService.getTop3Competitors(universityId);
     }
 
+    @GetMapping("/api/daily-assessments/{universityId}/analytics")
+    public List<DailyAssessmentCountResponse> getDailyAssessmentsForUniversity(
+            @PathVariable Long universityId) {
+        return assessmentService.getDailyAssessmentCountForUniversity(universityId);
+    }
+
 }
 
 
