@@ -307,6 +307,34 @@ public class AdminController {
         return assessmentService.getDailySameSchoolCount(universityId);
     }
 
+    @GetMapping("/api/other-school/{universityId}/analytics")
+    public List<DailyOtherSchoolCountResponse> getDailyOtherSchoolCount(
+            @PathVariable Long universityId
+    ) {
+        return assessmentService.getDailyOtherSchoolCount(universityId);
+    }
+
+    @GetMapping("/api/new-school/{universityId}/analytics")
+    public List<DailyNewSchoolCountResponse> getDailyNewSchoolCount(
+            @PathVariable Long universityId
+    ) {
+        return assessmentService.getDailyNewSchoolCount(universityId);
+    }
+
+    @GetMapping("/api/courses/{universityId}/analytics")
+    public List<CourseCountResponse> getCourseCounts(
+            @PathVariable Long universityId
+    ) {
+        return assessmentService.getCourseCountsByUniversity(universityId);
+    }
+
+    @GetMapping("/api/competitors/{universityId}/analytics")
+    public List<CompetitorUniversityCountResponse> getDailyCompetitorCounts(
+            @PathVariable Long universityId
+    ) {
+        return assessmentService.getCompetitorCounts(universityId);
+    }
+
 }
 
 
