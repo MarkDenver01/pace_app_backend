@@ -112,6 +112,26 @@ public class AssessmentService {
         );
     }
 
+    public long getTotalAssessments(Long universityId) {
+        return studentAssessmentRepository.countByUniversity_UniversityId(universityId);
+    }
+
+    public long getTotalSameSchool(Long universityId) {
+        return studentAssessmentRepository
+                .countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(universityId, "Same School");
+    }
+
+    public long getTotalOtherSchool(Long universityId) {
+        return studentAssessmentRepository
+                .countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(universityId, "Other School");
+    }
+
+    public long getTotalNewSchool(Long universityId) {
+        return studentAssessmentRepository
+                .countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(universityId, "New School");
+    }
+
+
     public StudentAssessmentResponse getStudentAssessment(Long universityId, String email) {
         return studentAssessmentRepository
                 .findByUniversity_UniversityIdAndEmail(universityId, email)

@@ -262,6 +262,28 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/api/university/{universityId}/stats")
+    public ResponseEntity<?> getUniversityStats(@PathVariable Long universityId) {
+        try {
+            long totalAssessments = assessmentService.getTotalAssessments(universityId);
+            long sameSchool = assessmentService.getTotalSameSchool(universityId);
+            long otherSchool = assessmentService.getTotalOtherSchool(universityId);
+            long newSchool = assessmentService.getTotalNewSchool(universityId);
+
+            UniversityStatsResponse response = new UniversityStatsResponse(
+                    universityId,
+                    totalAssessments,
+                    sameSchool,
+                    otherSchool,
+                    newSchool
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }
 
 

@@ -9,8 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface StudentAssessmentRepository extends JpaRepository<StudentAssessment, Long> {
-    long countByUniversity_UniversityId(Long universityId);
-
     boolean existsByEmail(String email);
 
     long countByUniversity_UniversityIdAndRecommendedCourses_CourseId(Long universityId, Long courseId);
@@ -20,4 +18,13 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     List<StudentAssessment> findByUniversity_UniversityId(Long universityId);
 
     Optional<StudentAssessment> findByEmail(String email);
+
+    long countByUniversity_UniversityId(Long universityId);
+
+    long countStudentAssessment_UniversityId(Long universityId);
+
+    // other school, new school, same school
+    long countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(Long universityId, String enrollmentStatus);
+
+
 }
