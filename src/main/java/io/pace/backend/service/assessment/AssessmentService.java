@@ -229,8 +229,8 @@ public class AssessmentService {
 
         return results.stream()
                 .map(r -> new TopCompetitorResponse(
-                        (String) r[0],             // competitorName
-                        ((BigInteger) r[1]).intValue() // totalCount
+                        (String) r[0],                  // competitorName
+                        ((Number) r[1]).intValue()      // totalCount
                 ))
                 .collect(Collectors.toList());
     }
