@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,19 +27,21 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     // other school, new school, same school
     long countByUniversity_UniversityIdAndEnrollmentStatusIgnoreCase(Long universityId, String enrollmentStatus);
 
-    @Query(value = """
-        SELECT rc.course_description AS courseDescription, COUNT(*) AS totalCount
-        FROM student_assessment sa
-        JOIN recommended_courses rc ON sa.student_id = rc.student_id
-        WHERE sa.university_id = :universityId
-          AND MONTH(STR_TO_DATE(sa.created_date, '%Y-%m-%d %H:%i:%s')) = :month
-        GROUP BY rc.course_description
-        ORDER BY totalCount DESC
-        LIMIT 5
-        """, nativeQuery = true)
-    List<Object[]> findTop5CoursesByUniversityIdAndMonth(
+
+
+    @Query("""
+    SELECT rc.courseDescription, COUNT(sa)
+    FROM StudentAssessment sa
+    JOIN sa.recommendedCourses rc
+    WHERE sa.university.universityId = :universityId
+      AND sa.createdDateTime BETWEEN :startDate AND :endDate
+    GROUP BY rc.courseDescription
+    ORDER BY COUNT(sa) DESC
+""")
+    List<Object[]> findTopCoursesByDateRange(
             @Param("universityId") Long universityId,
-            @Param("month") int month
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
     );
 
     @Query(value = """
@@ -51,5 +54,6 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
         LIMIT 3
         """, nativeQuery = true)
     List<Object[]> findTop3CompetitorUniversitiesByUniversityId(@Param("universityId") Long universityId);
+
 
 }

@@ -9,6 +9,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -205,22 +207,26 @@ public class AssessmentService {
 
     }
 
-    public List<TopCourseResponse> getTopCourses(Long universityId, int month) {
-        List<Object[]> results = studentAssessmentRepository.findTop5CoursesByUniversityIdAndMonth(universityId, month);
+    public List<TopCourseResponse> getTopCourses(Long universityId) {
+        LocalDate endDate = LocalDate.now(); // today
+        LocalDate startDate = endDate.minusMonths(5); // 5 months ago
+
+        List<Object[]> results = studentAssessmentRepository.findTopCoursesByDateRange(universityId, startDate, endDate);
+
+        // Map Object[] to DTO
         return results.stream()
-                .map(r -> new TopCourseResponse(
-                        (String) r[0],
-                        ((Number) r[1]).longValue()
-                ))
+                .map(r -> new TopCourseResponse((String) r[0], ((Long) r[1]).intValue()))
+                .limit(5) // get top 5
                 .collect(Collectors.toList());
     }
 
-    public List<TopCompetitorResponse> getTopCompetitors(Long universityId) {
+    public List<TopCompetitorResponse> getTop3Competitors(Long universityId) {
         List<Object[]> results = studentAssessmentRepository.findTop3CompetitorUniversitiesByUniversityId(universityId);
+
         return results.stream()
                 .map(r -> new TopCompetitorResponse(
-                        (String) r[0],
-                        ((Number) r[1]).longValue()
+                        (String) r[0],             // competitorName
+                        ((BigInteger) r[1]).intValue() // totalCount
                 ))
                 .collect(Collectors.toList());
     }
