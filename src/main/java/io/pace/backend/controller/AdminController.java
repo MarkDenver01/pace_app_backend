@@ -284,6 +284,19 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/api/{universityId}/top-courses")
+    public List<TopCourseResponse> getTopCourses(
+            @PathVariable Long universityId,
+            @RequestParam int month
+    ) {
+        return assessmentService.getTopCourses(universityId, month);
+    }
+
+    @GetMapping("/api/{universityId}/top-competitors")
+    public List<TopCompetitorResponse> getTopCompetitors(@PathVariable Long universityId) {
+        return assessmentService.getTopCompetitors(universityId);
+    }
+
 }
 
 

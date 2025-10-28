@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AssessmentService {
@@ -202,5 +203,25 @@ public class AssessmentService {
 
         studentAssessmentRepository.delete(student);
 
+    }
+
+    public List<TopCourseResponse> getTopCourses(Long universityId, int month) {
+        List<Object[]> results = studentAssessmentRepository.findTop5CoursesByUniversityIdAndMonth(universityId, month);
+        return results.stream()
+                .map(r -> new TopCourseResponse(
+                        (String) r[0],
+                        ((Number) r[1]).longValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<TopCompetitorResponse> getTopCompetitors(Long universityId) {
+        List<Object[]> results = studentAssessmentRepository.findTop3CompetitorUniversitiesByUniversityId(universityId);
+        return results.stream()
+                .map(r -> new TopCompetitorResponse(
+                        (String) r[0],
+                        ((Number) r[1]).longValue()
+                ))
+                .collect(Collectors.toList());
     }
 }
