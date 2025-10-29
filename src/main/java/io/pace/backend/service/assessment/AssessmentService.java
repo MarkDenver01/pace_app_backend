@@ -353,16 +353,11 @@ public class AssessmentService {
         List<Object[]> results = studentAssessmentRepository.countCompetitorUniversitiesByDate(start, end, universityId);
 
         return results.stream()
-                .map(r -> {
-                    if (r.length < 3) {
-                        return new CompetitorUniversityCountResponse("N/A", "N/A", 0);
-                    }
-                    return new CompetitorUniversityCountResponse(
-                            r[0].toString(),
-                            (String) r[1],
-                            ((Number) r[2]).intValue()
-                    );
-                })
+                .map(r -> new CompetitorUniversityCountResponse(
+                        r[0].toString(),           // date
+                        (String) r[1],             // university name
+                        ((Number) r[2]).intValue() // count
+                ))
                 .collect(Collectors.toList());
     }
 
