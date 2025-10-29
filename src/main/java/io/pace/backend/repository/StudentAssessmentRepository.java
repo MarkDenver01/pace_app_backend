@@ -130,14 +130,14 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     List<Object[]> countStudentsPerCourse(@Param("universityId") Long universityId);
 
     @Query("""
-        SELECT FUNCTION('DATE', sa.createdDateTime) AS date, sa.enrolledUniversity, COUNT(sa) AS count
-        FROM StudentAssessment sa
-        WHERE sa.university.universityId = :universityId
-          AND LOWER(sa.enrollmentStatus) = 'other school'
-          AND sa.createdDateTime BETWEEN :startDate AND :endDate
-        GROUP BY FUNCTION('DATE', sa.createdDateTime), sa.enrolledUniversity
-        ORDER BY FUNCTION('DATE', sa.createdDateTime), COUNT(sa) DESC
-        """)
+       SELECT FUNCTION('DATE', sa.createdDateTime) AS date, COUNT(sa) AS count
+       FROM StudentAssessment sa
+       WHERE sa.createdDateTime BETWEEN :startDate AND :endDate
+         AND sa.university.universityId = :universityId
+         AND LOWER(sa.enrollmentStatus) = 'other school'
+       GROUP BY FUNCTION('DATE', sa.createdDateTime)
+       ORDER BY FUNCTION('DATE', sa.createdDateTime)
+       """)
     List<Object[]> countCompetitorUniversitiesByDate(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
