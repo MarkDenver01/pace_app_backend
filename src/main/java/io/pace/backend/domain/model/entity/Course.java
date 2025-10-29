@@ -23,7 +23,7 @@ public class Course {
     private Long courseId;
 
     @NotBlank(message = "Course name is required")
-    @Column(name = "course_name", nullable = false)
+    @Column(name = "course_name", nullable = false, length = 5000)
     private String courseName;
 
     @NotBlank(message = "Course description is required")
