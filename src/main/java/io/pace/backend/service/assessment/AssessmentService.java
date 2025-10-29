@@ -355,9 +355,8 @@ public class AssessmentService {
 
         return results.stream()
                 .map(r -> new CompetitorUniversityCountResponse(
-                        r[0].toString(),           // date
-                        (String) r[1],             // competitor university
-                        ((Number) r[2]).intValue() // count
+                        r[0].toString(),
+                        r[1].toString()
                 ))
                 .collect(Collectors.toList());
     }

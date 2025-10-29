@@ -139,10 +139,10 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     Object[] findMinAndMaxCreatedDateForCompetitors(@Param("universityId") Long universityId);
 
     // Count competitor students per date and enrolled university
+
     @Query("""
         SELECT FUNCTION('DATE', sa.createdDateTime) AS date,
-               sa.enrolledUniversity AS competitorName,
-               COUNT(sa) AS totalCount
+               sa.enrolledUniversity AS competitorName
         FROM StudentAssessment sa
         WHERE sa.university.universityId = :universityId
           AND sa.createdDateTime BETWEEN :startDate AND :endDate

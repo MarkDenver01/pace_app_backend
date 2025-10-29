@@ -8,5 +8,4 @@ import lombok.Data;
 public class CompetitorUniversityCountResponse {
     private String date;           // yyyy-MM-dd
     private String universityName; // competitor university
-    private int count;             // total students
 }
