@@ -40,7 +40,7 @@ public interface UserDomainService {
 
     Optional<Admin> findAdminById(Long adminId);
 
-    void deleteAdminAccount(Long userId);
+    void deleteAdminAccount(String email);
 
     Student approvedStudent(String email, AccountStatus accountStatus);
 

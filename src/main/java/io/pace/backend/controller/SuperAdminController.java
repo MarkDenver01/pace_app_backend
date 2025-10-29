@@ -254,9 +254,9 @@ public class SuperAdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/api/admin_account/delete/{userId}")
-    public ResponseEntity<String> deleteAdminAccount(@PathVariable Long userId) {
-        userService.deleteAdminAccount(userId);
+    @DeleteMapping("/api/admin_account/delete/{email}")
+    public ResponseEntity<String> deleteAdminAccount(@PathVariable String email) {
+        userService.deleteAdminAccount(email);
         return ResponseEntity.ok("University admin account deleted successfully");
     }
 

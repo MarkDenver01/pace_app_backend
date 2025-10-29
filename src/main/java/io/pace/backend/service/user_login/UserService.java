@@ -273,8 +273,8 @@ public class UserService implements UserDomainService {
     }
 
     @Override
-    public void deleteAdminAccount(Long userId) {
-        User user = userRepository.findById(userId)
+    public void deleteAdminAccount(String email) {
+        User user = userRepository.findByEmail(email)
                         .orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
     }
