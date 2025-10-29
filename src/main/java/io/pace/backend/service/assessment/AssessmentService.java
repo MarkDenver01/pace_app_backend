@@ -341,6 +341,7 @@ public class AssessmentService {
 
     public List<CompetitorUniversityCountResponse> getCompetitorCounts(Long universityId) {
 
+        // Get min & max date for competitor students
         Object[] minMax = studentAssessmentRepository.findMinAndMaxCreatedDateForCompetitors(universityId);
 
         if (minMax == null || minMax[0] == null || minMax[1] == null) {
@@ -350,12 +351,12 @@ public class AssessmentService {
         LocalDateTime start = (LocalDateTime) minMax[0];
         LocalDateTime end = (LocalDateTime) minMax[1];
 
-        List<Object[]> results = studentAssessmentRepository.countCompetitorUniversitiesByDate(start, end, universityId);
+        List<Object[]> results = studentAssessmentRepository.findCompetitorCountsByDate(start, end, universityId);
 
         return results.stream()
                 .map(r -> new CompetitorUniversityCountResponse(
                         r[0].toString(),           // date
-                        (String) r[1],             // university name
+                        (String) r[1],             // competitor university
                         ((Number) r[2]).intValue() // count
                 ))
                 .collect(Collectors.toList());
