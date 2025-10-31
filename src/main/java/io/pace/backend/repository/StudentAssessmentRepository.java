@@ -156,4 +156,27 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
             @Param("universityId") Long universityId
     );
 
+    // ------------- top 5 courses
+    @Query("""
+    SELECT rc.courseDescription AS courseDescription,
+           COUNT(sa) AS totalStudents
+    FROM RecommendedCourses rc
+    JOIN rc.studentAssessment sa
+    WHERE sa.university.universityId = :universityId
+      AND sa.createdDateTime BETWEEN :fromDate AND :toDate
+    GROUP BY rc.courseDescription
+    ORDER BY COUNT(sa) DESC
+    """)
+    List<Object[]> findTopCoursesByUniversityAndDateRange(
+            @Param("universityId") Long universityId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
+    );
+
+    @Query("SELECT MIN(sa.createdDateTime) FROM StudentAssessment sa WHERE sa.university.universityId = :universityId")
+    LocalDateTime findEarliestDate(@Param("universityId") Long universityId);
+
+    @Query("SELECT MAX(sa.createdDateTime) FROM StudentAssessment sa WHERE sa.university.universityId = :universityId")
+    LocalDateTime findLatestDate(@Param("universityId") Long universityId);
+
 }

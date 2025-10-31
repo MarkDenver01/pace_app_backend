@@ -224,6 +224,25 @@ public class AssessmentService {
                 .collect(Collectors.toList());
     }
 
+    public List<TopCourseResponse> getTopCoursesByUniversityAutoDate(Long universityId) {
+        // Fetch date range dynamically from DB
+        LocalDateTime fromDate = studentAssessmentRepository.findEarliestDate(universityId);
+        LocalDateTime toDate = studentAssessmentRepository.findLatestDate(universityId);
+
+        if (fromDate == null || toDate == null) {
+            return List.of(); // No data
+        }
+
+        List<Object[]> results = studentAssessmentRepository.findTopCoursesByUniversityAndDateRange(
+                universityId, fromDate, toDate
+        );
+
+        return results.stream()
+                .map(obj -> new TopCourseResponse((String) obj[0], ((Number) obj[1]).longValue()))
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
     public List<TopCompetitorResponse> getTop3Competitors(Long universityId) {
         List<Object[]> results = studentAssessmentRepository.findTop3CompetitorUniversitiesByUniversityId(universityId);
 

@@ -335,6 +335,11 @@ public class AdminController {
         return assessmentService.getCompetitorCounts(universityId);
     }
 
+    @GetMapping("/api/top5-courses/{universityId}/analytics")
+    public List<TopCourseResponse> getTop5Courses(
+            @PathVariable Long universityId) {
+        return assessmentService.getTopCoursesByUniversityAutoDate(universityId);
+    }
 }
 
 
