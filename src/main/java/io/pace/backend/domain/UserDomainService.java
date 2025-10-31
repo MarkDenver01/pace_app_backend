@@ -2,6 +2,7 @@ package io.pace.backend.domain;
 
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.model.entity.*;
+import io.pace.backend.domain.model.request.UpdateAdminRequest;
 import io.pace.backend.domain.model.request.VerifyAccountRequest;
 
 import java.util.List;
@@ -57,4 +58,6 @@ public interface UserDomainService {
     boolean isFacebookAccountExists(String email);
 
     void updateUserName(String userName, String email);
+
+    Admin updatePendingAdmin(Long adminId, UpdateAdminRequest request);
 }

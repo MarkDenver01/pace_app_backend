@@ -4,10 +4,7 @@ package io.pace.backend.controller;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.*;
-import io.pace.backend.domain.model.request.CourseRequest;
-import io.pace.backend.domain.model.request.QuestionRequest;
-import io.pace.backend.domain.model.request.RegisterRequest;
-import io.pace.backend.domain.model.request.UniversityRequest;
+import io.pace.backend.domain.model.request.*;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.assessment.AssessmentService;
@@ -234,6 +231,15 @@ public class SuperAdminController {
         userService.registerUser(user);
 
         return ResponseEntity.ok(new MessageResponse("success"));
+    }
+
+    @PutMapping("/api/admin_account/{adminId}/update")
+    public ResponseEntity<?> updateAdmin(
+            @PathVariable Long adminId,
+            @Valid @RequestBody UpdateAdminRequest request
+    ) {
+        Admin updatedAdmin = userService.updatePendingAdmin(adminId, request);
+        return ResponseEntity.ok(updatedAdmin);
     }
 
     @PutMapping("/admin_account/{id}/status")

@@ -5,6 +5,7 @@ import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.UserDomainService;
 import io.pace.backend.domain.enums.AccountStatus;
 import io.pace.backend.domain.model.entity.*;
+import io.pace.backend.domain.model.request.UpdateAdminRequest;
 import io.pace.backend.domain.model.request.VerifyAccountRequest;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.email.GmailService;
@@ -235,6 +236,42 @@ public class UserService implements UserDomainService {
             }
         }
 
+    }
+
+    @Override
+    public Admin updatePendingAdmin(Long adminId, UpdateAdminRequest request) {
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin not found"));
+
+        // Only allow updates if account status is PENDING
+        if (admin.getUserAccountStatus() != AccountStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending accounts can be updated");
+        }
+
+        // Check if email is already used by another user/admin
+        userRepository.findByEmail(request.getEmail())
+                .filter(u -> !u.getUserId().equals(admin.getUser().getUserId()))
+                .ifPresent(u -> { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists"); });
+
+        adminRepository.findByEmail(request.getEmail())
+                .filter(a -> !a.getAdminId().equals(admin.getAdminId()))
+                .ifPresent(a -> { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists"); });
+
+        University university = universityRepository.findById(Math.toIntExact(request.getUniversityId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "University not found"));
+
+        // Update Admin fields
+        admin.setUserName(request.getUsername());
+        admin.setEmail(request.getEmail());
+        admin.setUniversity(university);
+
+        // Update linked User fields
+        User user = admin.getUser();
+        user.setUserName(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setUniversity(university);
+
+        return adminRepository.save(admin);
     }
 
     @Override
