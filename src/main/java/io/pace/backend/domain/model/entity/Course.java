@@ -27,7 +27,7 @@ public class Course {
     private String courseName;
 
     @NotBlank(message = "Course description is required")
-    @Column(name = "course_description", nullable = false)
+    @Column(name = "course_description", columnDefinition = "TEXT", nullable = false)
     private String courseDescription;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
