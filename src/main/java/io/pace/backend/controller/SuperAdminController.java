@@ -119,6 +119,12 @@ public class SuperAdminController {
         return ResponseEntity.ok(updated);
     }
 
+    @DeleteMapping("/api/course/delete/{id}")
+    public ResponseEntity<String> deleteCourse(@PathVariable("id") Long courseId) {
+        courseService.deleteCourse(courseId);
+        return ResponseEntity.ok("Course deleted successfully.");
+    }
+
     @GetMapping("/api/university/all")
     public ResponseEntity<?> getAllUniversities() {
         try {
