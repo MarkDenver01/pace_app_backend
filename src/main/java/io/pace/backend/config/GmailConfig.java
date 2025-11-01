@@ -20,7 +20,7 @@ import java.util.List;
 @Configuration
 public class GmailConfig {
 
-    private static final String APPLICATION_NAME = "io.pace.backend";
+    private static final String APPLICATION_NAME = "pace_app_backend";
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     private static final List<String> SCOPES = List.of(
