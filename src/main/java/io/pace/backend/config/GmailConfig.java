@@ -11,14 +11,16 @@ import com.google.api.services.gmail.GmailScopes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
 @Configuration
 public class GmailConfig {
-    private static final String APPLICATION_NAME = "pace_app_backend";
+
+    private static final String APPLICATION_NAME = "io.pace.backend";
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     private static final List<String> SCOPES = List.of(
@@ -26,12 +28,12 @@ public class GmailConfig {
             GmailScopes.GMAIL_READONLY
     );
 
+    private static final Path TOKENS_PATH = Paths.get("tokens");
+
     @Bean
     public Gmail gmailClient() throws Exception {
-        com.google.api.client.http.HttpTransport httpTransport =
-                GoogleNetHttpTransport.newTrustedTransport();
-
-        Credential credential = authorize(httpTransport);
+        var httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        var credential = authorize(httpTransport);
 
         return new Gmail.Builder(httpTransport, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
@@ -49,19 +51,22 @@ public class GmailConfig {
 
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
-                .setAccessType("offline")
-                .setApprovalPrompt("force")
+                .setDataStoreFactory(new FileDataStoreFactory(TOKENS_PATH.toFile()))
+                .setAccessType("offline") // ensures refresh token is stored
                 .build();
 
-        // Render doesn’t support interactive login, so token must already exist in tokens directory
         Credential credential = flow.loadCredential("user");
 
+        // Auto-refresh access token if expired
         if (credential == null) {
-            throw new IllegalStateException("No Gmail credentials found. Authorize locally first and upload tokens.");
+            throw new IllegalStateException(
+                    "No Gmail credentials found. Authorize locally using GmailAuth class and upload tokens.");
+        } else if (credential.getExpiresInSeconds() != null && credential.getExpiresInSeconds() <= 60) {
+            if (!credential.refreshToken()) {
+                throw new IllegalStateException("Failed to refresh Gmail token. Re-run local auth to generate new token.");
+            }
         }
 
         return credential;
     }
-
 }
