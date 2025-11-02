@@ -179,4 +179,14 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     @Query("SELECT MAX(sa.createdDateTime) FROM StudentAssessment sa WHERE sa.university.universityId = :universityId")
     LocalDateTime findLatestDate(@Param("universityId") Long universityId);
 
+
+    // ------------------- get all course tha assessed by students
+    @Query("""
+    SELECT rc.courseDescription AS courseName, COUNT(DISTINCT sa.studentId) AS assessedCount
+    FROM StudentAssessment sa
+    JOIN sa.recommendedCourses rc
+    GROUP BY rc.courseDescription
+        """)
+    List<Object[]> countStudentsPerCourseOverall();
+
 }

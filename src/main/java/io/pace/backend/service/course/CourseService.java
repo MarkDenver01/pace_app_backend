@@ -5,12 +5,14 @@ import io.pace.backend.domain.model.entity.University;
 import io.pace.backend.domain.model.request.CourseRequest;
 import io.pace.backend.domain.model.response.CourseResponse;
 import io.pace.backend.repository.CourseRepository;
+import io.pace.backend.repository.StudentAssessmentRepository;
 import io.pace.backend.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +21,9 @@ public class CourseService {
 
     @Autowired
     CourseRepository courseRepository;
+
+    @Autowired
+    StudentAssessmentRepository studentAssessmentRepository;
 
     @Autowired
     UniversityRepository universityRepository;
@@ -38,21 +43,31 @@ public class CourseService {
     }
 
     public List<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().stream()
+        // Fetch all courses
+        List<Course> courses = courseRepository.findAll();
+
+        // Fetch counts from assessments
+        List<Object[]> counts = studentAssessmentRepository.countStudentsPerCourseOverall();
+
+        // Convert to map for easy lookup
+        Map<String, Long> assessedCountMap = counts.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],   // courseDescription
+                        row -> (Long) row[1]
+                ));
+
+        // Map results to CourseResponse
+        return courses.stream()
                 .map(c -> {
-                    int max = 0;
-                    int assessed = 0;
-
-                    // no assessment logic yet, so return to 0
-                    assessed = 0;
-
+                    long assessed = assessedCountMap.getOrDefault(c.getCourseName(), 0L);
+                    int max = 0; // if you plan to use this later
                     return new CourseResponse(
                             c.getCourseId(),
                             c.getCourseName(),
                             c.getCourseDescription(),
                             c.getStatus(),
-                            max,
-                            assessed
+                            (int) assessed,
+                            max
                     );
                 })
                 .collect(Collectors.toList());
