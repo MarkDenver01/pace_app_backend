@@ -247,9 +247,9 @@ public class AssessmentService {
         List<Object[]> results = studentAssessmentRepository.findTop3CompetitorUniversitiesByUniversityId(universityId);
 
         return results.stream()
-                .map(r -> new TopCompetitorResponse(
-                        (String) r[0],                  // competitorName
-                        ((Number) r[1]).intValue()      // totalCount
+                .map(result -> new TopCompetitorResponse(
+                        (String) result[0],                 // competitorName
+                        ((Number) result[1]).intValue()     // totalCount
                 ))
                 .collect(Collectors.toList());
     }

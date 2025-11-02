@@ -44,15 +44,18 @@ public interface StudentAssessmentRepository extends JpaRepository<StudentAssess
     );
 
     @Query(value = """
-        SELECT sa.enrolled_university AS competitorName, COUNT(*) AS totalCount
-        FROM student_assessment sa
-        WHERE sa.university_id = :universityId
-          AND LOWER(sa.enrollment_status) = 'other school'
-        GROUP BY sa.enrolled_university
-        ORDER BY totalCount DESC
-        LIMIT 3
-        """, nativeQuery = true)
+    SELECT sa.enrolled_university AS competitor_name, COUNT(*) AS total_count
+    FROM student_assessment sa
+    WHERE sa.university_id = :universityId
+      AND sa.enrolled_university IS NOT NULL
+      AND TRIM(sa.enrolled_university) <> ''
+    GROUP BY sa.enrolled_university
+    ORDER BY total_count DESC
+    LIMIT 3
+    """, nativeQuery = true)
     List<Object[]> findTop3CompetitorUniversitiesByUniversityId(@Param("universityId") Long universityId);
+
+
 
 
     @Query("SELECT MIN(sa.createdDateTime), MAX(sa.createdDateTime) " +
