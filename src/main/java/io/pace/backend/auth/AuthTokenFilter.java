@@ -35,6 +35,16 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
+        String path = request.getRequestURI();
+        if (path.startsWith("/api/gmail/oauth2/")
+                || path.startsWith("/oauth2/")
+                || path.startsWith("/user/public/")
+                || path.startsWith("/uploads/")
+                || path.equals("/csrf_token")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             String jwt = parseJwt(request);
