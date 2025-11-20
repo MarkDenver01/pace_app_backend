@@ -1,22 +1,15 @@
-# Use OpenJDK 21
-FROM openjdk:21-jdk-slim
-
+# --- Build Stage ---
+FROM eclipse-temurin:21-jdk-jammy AS build
 WORKDIR /app
 
-# Install curl for debugging (optional)
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-# Copy project files
 COPY . .
-
-# Make Maven wrapper executable
 RUN chmod +x mvnw
+RUN ./mvnw -q -DskipTests clean package
 
-# Build the Spring Boot JAR
-RUN ./mvnw clean package -DskipTests
+# --- Runtime Stage ---
+FROM eclipse-temurin:21-jre-jammy
+WORKDIR /app
 
-# Expose application port
-#EXPOSE 8080
+COPY --from=build /app/target/*.jar app.jar
 
-# Start the Spring Boot app directly
-ENTRYPOINT ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
