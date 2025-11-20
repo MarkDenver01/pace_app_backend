@@ -8,6 +8,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -20,6 +21,7 @@ import java.util.Properties;
 @Service
 public class GmailService {
     @Autowired
+    @Lazy
     Gmail gmailClient;
 
     @Value("${base.url.react}")
@@ -29,12 +31,14 @@ public class GmailService {
 
     // Common method to send any message via Gmail API
     private void sendMessage(String to, String subject, String text) {
+        requireGmailLinked();
+
         try {
             Properties props = new Properties();
             Session session = Session.getInstance(props, null);
 
             MimeMessage email = new MimeMessage(session);
-            email.setFrom(new InternetAddress("me", "PACE ADMIN")); // Gmail API uses "me"
+            email.setFrom(new InternetAddress("me", "WrapAndCarry")); // Gmail API uses "me"
             email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(to));
             email.setSubject(subject);
             email.setText(text);
@@ -88,4 +92,11 @@ public class GmailService {
         // Format it to always be 4 digits (e.g., 0057, 0423)
         return String.format("%04d", code);
     }
+
+    private void requireGmailLinked() {
+        if (gmailClient == null) {
+            throw new RuntimeException("Gmail is not linked yet. Visit /user/auth to link Gmail.");
+        }
+    }
+
 }
