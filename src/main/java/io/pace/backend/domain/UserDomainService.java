@@ -19,6 +19,8 @@ public interface UserDomainService {
 
     void updatePassword(String email, Long universityId, String newPassword, String emailDomain);
 
+    void activateAccount(String email, Long universityId);
+
     void generatePasswordResetToken(String email);
 
     void resetPassword(String token, String newPassword);

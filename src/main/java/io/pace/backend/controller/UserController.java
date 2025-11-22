@@ -140,6 +140,20 @@ public class  UserController {
         }
     }
 
+    @PutMapping("/public/activate-account")
+    public ResponseEntity<?> activeAdminAccount(@RequestBody ActivateAccountRequest activateAccountRequest) {
+        try {
+            userService.activateAccount(activateAccountRequest.getEmail(),
+                    activateAccountRequest.getUniversityId());
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", ex.getMessage()
+            ));
+        }
+    }
+
     @PutMapping("/api/student/update-password")
     public ResponseEntity<?> updateStudentPassword(@RequestParam("email") String email,
                                                    @RequestParam("password") String password) {

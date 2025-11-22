@@ -115,8 +115,29 @@ public class UserService implements UserDomainService {
 
         // Update Admin status if exists
         adminRepository.findByUser_UserId(user.getUserId()).ifPresent(admin -> {
-            admin.setUserAccountStatus(AccountStatus.VERIFIED);
             admin.setEmailDomain(emailDomain);
+            adminRepository.save(admin);
+        });
+    }
+
+    @Override
+    public void activateAccount(String email, Long universityId) {
+        // Fetch users or throw if none exist
+        List<User> users = userRepository.findByEmailAndUniversity_UniversityId(
+                email,
+                universityId
+        );
+
+        if (users.isEmpty()) {
+            throw new RuntimeException("User not found for this university");
+        }
+
+        // Take the first user (or filter for an admin if applicable)
+        User user = users.get(0);
+
+        // Update Admin status if exists
+        adminRepository.findByUser_UserId(user.getUserId()).ifPresent(admin -> {
+            admin.setUserAccountStatus(AccountStatus.VERIFIED);
             adminRepository.save(admin);
         });
     }
