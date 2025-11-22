@@ -57,10 +57,15 @@ public class GmailService {
     }
 
     public void sendPasswordResetEmail(String to, String resetUrl) {
-        String subject = "Password Reset";
-        String text = "Reset your password here: " + resetUrl;
+        String subject = "[PACE] Password Reset Request";
+        String text = "We received a request to reset your password for your PACE admin account.\n\n"
+                + "Please click the link below to set a new password. "
+                + "This link is valid for 15 minutes:\n\n"
+                + resetUrl + "\n\n"
+                + "If you did not request this, you can safely ignore this email.";
         sendMessage(to, subject, text);
     }
+
 
     public void sendTemporaryPassword(String to, String tempPassword, Long universityId) {
         String subject = "Your Temporary Account Password";

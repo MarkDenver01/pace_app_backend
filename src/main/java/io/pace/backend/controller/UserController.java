@@ -435,21 +435,29 @@ public class  UserController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             userService.generatePasswordResetToken(email);
-            return ResponseEntity.ok(new MessageResponse("success"));
+            // For security you may ALWAYS return success even if email not found
+            return ResponseEntity.ok(new MessageResponse("If the email exists, a reset link has been sent."));
+        } catch (RuntimeException e) {
+            log.warn("Forgot password error for email {}: {}", email, e.getMessage());
+            // Use generic response to avoid email enumeration
+            return ResponseEntity.ok(new MessageResponse("If the email exists, a reset link has been sent."));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(new MessageResponse("internal server error"));
+            log.error("Unexpected error in forgotPassword: ", e);
+            return ResponseEntity.internalServerError()
+                    .body(new MessageResponse("Internal server error"));
         }
     }
 
     @PostMapping("/api/reset_password")
-    public ResponseEntity<?> resetPassword(@RequestParam String token,
-                                           @RequestParam String newPassword) {
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         try {
-            userService.resetPassword(token, newPassword);
-            return ResponseEntity.ok(new MessageResponse("success"));
+            userService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok(new MessageResponse("Password reset successful"));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new MessageResponse("Internal server error"));
         }
     }
 

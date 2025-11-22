@@ -9,6 +9,7 @@ import io.pace.backend.domain.model.request.UpdateAdminRequest;
 import io.pace.backend.domain.model.request.VerifyAccountRequest;
 import io.pace.backend.repository.*;
 import io.pace.backend.service.email.GmailService;
+import io.pace.backend.service.security.ResetTokenCryptoService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +58,10 @@ public class UserService implements UserDomainService {
 
     @Autowired
     GmailService emailService;
+
+    @Autowired
+    ResetTokenCryptoService resetTokenCryptoService;
+
 
     @Override
     public List<User> getAllUsers() {
@@ -157,36 +162,74 @@ public class UserService implements UserDomainService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = UUID.randomUUID().toString();
-        Instant expiryDate = Instant.now().plus(24, ChronoUnit.HOURS);
-        PasswordResetToken resetToken = new PasswordResetToken(token, expiryDate, user);
+        // Only allow admins or whatever rule you want
+        Admin admin = user.getAdmin();
+        if (admin == null) {
+            throw new RuntimeException("No admin record linked to this user");
+        }
+
+        // 1) Mark account as FORGOT_PASSWORD
+        admin.setUserAccountStatus(AccountStatus.FORGOT_PASSWORD);
+        adminRepository.save(admin);
+
+        // 2) Invalidate previous tokens (optional but safer)
+        passwordResetTokenRepository.findAll().stream()
+                .filter(t -> t.getUser().getUserId().equals(user.getUserId()) && !t.isUsed())
+                .forEach(t -> {
+                    t.setUsed(true);
+                    passwordResetTokenRepository.save(t);
+                });
+
+        // 3) Create fresh raw token
+        String rawToken = UUID.randomUUID().toString();
+
+        // 4) DB record uses raw token
+        Instant expiryDate = Instant.now().plus(15, ChronoUnit.MINUTES);
+        PasswordResetToken resetToken = new PasswordResetToken(rawToken, expiryDate, user);
         passwordResetTokenRepository.save(resetToken);
 
-        String resetUrl = baseUrl + "/reset_password?token=" + token;
-        // send email to user
+        // 5) Encrypt token for URL
+        String encryptedToken = resetTokenCryptoService.encrypt(rawToken);
+
+        String resetUrl = baseUrl + "/reset_password?token=" + encryptedToken;
+
+        // 6) Send email
         emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
     }
 
     @Override
-    public void resetPassword(String token, String newPassword) {
-        PasswordResetToken resetToken = passwordResetTokenRepository
-                .findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid password reset token"));
+    public void resetPassword(String encryptedToken, String newPassword) {
+        // 1) Decrypt token from URL
+        String rawToken = resetTokenCryptoService.decrypt(encryptedToken);
 
-        if (resetToken.isUsed()) {
-            throw new RuntimeException("Password reset token is used");
+        // 2) Lookup token
+        PasswordResetToken token = passwordResetTokenRepository.findByToken(rawToken)
+                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+
+        // 3) Validate token status
+        if (token.isUsed()) {
+            throw new RuntimeException("Reset token already used");
         }
 
-        if (resetToken.getExpiryTime().isBefore(Instant.now())) {
-            throw new RuntimeException("Password reset token is expired");
+        if (token.getExpiryTime().isBefore(Instant.now())) {
+            throw new RuntimeException("Reset token expired");
         }
 
-        User user = resetToken.getUser();
+        // 4) Update user password
+        User user = token.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        resetToken.setUsed(true);
-        passwordResetTokenRepository.save(resetToken);
+        // 5) Mark token used
+        token.setUsed(true);
+        passwordResetTokenRepository.save(token);
+
+        // 6) Restore admin account status (if admin)
+        Admin admin = user.getAdmin();
+        if (admin != null) {
+            admin.setUserAccountStatus(AccountStatus.ACTIVATE); // or VERIFIED, up to you
+            adminRepository.save(admin);
+        }
     }
 
     @Override

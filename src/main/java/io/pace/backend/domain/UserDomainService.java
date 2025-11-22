@@ -23,7 +23,7 @@ public interface UserDomainService {
 
     void generatePasswordResetToken(String email);
 
-    void resetPassword(String token, String newPassword);
+    void resetPassword(String encryptedToken, String newPassword);
 
     Optional<User> findByEmail(String email);
 
@@ -62,4 +62,5 @@ public interface UserDomainService {
     void updateUserName(String userName, String email);
 
     Admin updatePendingAdmin(Long adminId, UpdateAdminRequest request);
+
 }
