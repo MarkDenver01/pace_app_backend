@@ -435,29 +435,49 @@ public class  UserController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             userService.generatePasswordResetToken(email);
-            // For security you may ALWAYS return success even if email not found
-            return ResponseEntity.ok(new MessageResponse("If the email exists, a reset link has been sent."));
+            return ResponseEntity.ok(new MessageResponse("success"));
         } catch (RuntimeException e) {
-            log.warn("Forgot password error for email {}: {}", email, e.getMessage());
-            // Use generic response to avoid email enumeration
-            return ResponseEntity.ok(new MessageResponse("If the email exists, a reset link has been sent."));
+            // user not found or other business error
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
-            log.error("Unexpected error in forgotPassword: ", e);
-            return ResponseEntity.internalServerError()
-                    .body(new MessageResponse("Internal server error"));
+            return ResponseEntity.internalServerError().body(new MessageResponse("internal server error"));
         }
     }
 
-    @PostMapping("/api/reset_password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+    @GetMapping("/public/reset_password/validate")
+    public ResponseEntity<?> validateResetToken(@RequestParam("token") String encryptedToken) {
         try {
-            userService.resetPassword(request.getToken(), request.getNewPassword());
+            User user = userService.validatePasswordResetToken(encryptedToken);
+
+            // return masked email or username only
+            String email = user.getEmail();
+            String maskedEmail = email.replaceAll("(^.).*(@.*$)", "$1***$2");
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("valid", true);
+            body.put("email", maskedEmail);
+
+            return ResponseEntity.ok(body);
+        } catch (RuntimeException e) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("valid", false);
+            body.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
+    @PostMapping("/public/reset_password/confirm")
+    public ResponseEntity<?> confirmResetPassword(
+            @RequestParam("token") String encryptedToken,
+            @RequestParam("newPassword") String newPassword
+    ) {
+        try {
+            userService.resetPassword(encryptedToken, newPassword);
             return ResponseEntity.ok(new MessageResponse("Password reset successful"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(new MessageResponse("Internal server error"));
+            return ResponseEntity.internalServerError().body(new MessageResponse("internal server error"));
         }
     }
 

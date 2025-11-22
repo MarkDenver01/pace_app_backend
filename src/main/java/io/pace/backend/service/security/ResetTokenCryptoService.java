@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -21,10 +22,26 @@ public class ResetTokenCryptoService {
 
     @PostConstruct
     public void init() {
-        byte[] keyBytes = Base64.getDecoder().decode(secretBase64);
-        if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
-            throw new IllegalStateException("reset-token-secret must be 16/24/32 bytes (AES key)");
+        if (secretBase64 == null || secretBase64.isBlank()) {
+            throw new IllegalStateException("security.reset-token-secret is missing or empty");
         }
+
+        byte[] keyBytes;
+        try {
+            keyBytes = Base64.getDecoder().decode(secretBase64);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(
+                    "security.reset-token-secret is not valid Base64", e
+            );
+        }
+
+        int len = keyBytes.length;
+        if (len != 16 && len != 24 && len != 32) {
+            throw new IllegalStateException(
+                    "reset-token-secret must decode to 16, 24, or 32 bytes (got " + len + ")"
+            );
+        }
+
         this.keySpec = new SecretKeySpec(keyBytes, "AES");
     }
 
@@ -37,8 +54,9 @@ public class ResetTokenCryptoService {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
 
-            byte[] cipherBytes = cipher.doFinal(plainText.getBytes());
-            // Store IV + cipherText in one blob
+            byte[] cipherBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+
+            // IV + ciphertext
             byte[] combined = new byte[iv.length + cipherBytes.length];
             System.arraycopy(iv, 0, combined, 0, iv.length);
             System.arraycopy(cipherBytes, 0, combined, iv.length, cipherBytes.length);
@@ -52,6 +70,11 @@ public class ResetTokenCryptoService {
     public String decrypt(String encrypted) {
         try {
             byte[] combined = Base64.getUrlDecoder().decode(encrypted);
+
+            if (combined.length < 17) { // must be at least 16 (IV) + 1 byte ciphertext
+                throw new IllegalArgumentException("Encrypted token too short");
+            }
+
             byte[] iv = new byte[16];
             byte[] cipherBytes = new byte[combined.length - 16];
 
@@ -64,7 +87,7 @@ public class ResetTokenCryptoService {
             cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
 
             byte[] plainBytes = cipher.doFinal(cipherBytes);
-            return new String(plainBytes);
+            return new String(plainBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException("Failed to decrypt reset token", e);
         }

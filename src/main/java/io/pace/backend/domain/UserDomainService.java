@@ -23,6 +23,8 @@ public interface UserDomainService {
 
     void generatePasswordResetToken(String email);
 
+    User validatePasswordResetToken(String encryptedToken);
+
     void resetPassword(String encryptedToken, String newPassword);
 
     Optional<User> findByEmail(String email);
