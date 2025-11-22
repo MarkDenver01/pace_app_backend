@@ -492,6 +492,18 @@ public class  UserController {
         }
     }
 
+
+    @GetMapping("/public/university/find")
+    public ResponseEntity<?> findUniversity(@RequestParam("university_id") Long universityId) {
+        try {
+            UniversityResponse university = universityService.getUniversity(universityId);
+            return ResponseEntity.ok(university.getUniversityId()); // return a single object, not a list
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/public/dynamic_link/generate/{universityId}")
     public ResponseEntity<Map<String, String>> getOrCreateLink(@PathVariable Long universityId) {
         UniversityLink universityLink = universityLinkService.getOrCreateLink(universityId);
