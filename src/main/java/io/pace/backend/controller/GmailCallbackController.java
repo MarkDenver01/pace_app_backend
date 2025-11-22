@@ -64,4 +64,31 @@ public class GmailCallbackController {
 
         return ResponseEntity.ok("Gmail successfully linked! You may close this tab.");
     }
+
+    @GetMapping("/authorize")
+    public ResponseEntity<?> authorize() throws Exception {
+
+        GoogleClientSecrets secrets = GoogleClientSecrets.load(
+                GsonFactory.getDefaultInstance(),
+                new StringReader(clientSecretJson)
+        );
+
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                GsonFactory.getDefaultInstance(),
+                secrets,
+                List.of(GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_READONLY)
+        )
+                .setAccessType("offline")
+                .setApprovalPrompt("force")
+                .build();
+
+        String url = flow.newAuthorizationUrl()
+                .setRedirectUri(redirectUri)
+                .setAccessType("offline")
+                .build();
+
+        return ResponseEntity.ok(url);
+    }
+
 }
