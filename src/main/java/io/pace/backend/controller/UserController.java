@@ -466,7 +466,7 @@ public class  UserController {
         }
     }
 
-    @PostMapping("/public/reset_password/confirm")
+    @PostMapping("/public/reset_password")
     public ResponseEntity<?> confirmResetPassword(
             @RequestParam("token") String encryptedToken,
             @RequestParam("newPassword") String newPassword
