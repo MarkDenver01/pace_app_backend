@@ -326,9 +326,9 @@ public class UserService implements UserDomainService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin not found"));
 
         // Only allow updates if account status is PENDING
-        if (admin.getUserAccountStatus() != AccountStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending accounts can be updated");
-        }
+//        if (admin.getUserAccountStatus() != AccountStatus.PENDING) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only pending accounts can be updated");
+//        }
 
         // Check if email is already used by another user/admin
         userRepository.findByEmail(request.getEmail())
