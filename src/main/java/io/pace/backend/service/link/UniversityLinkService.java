@@ -78,7 +78,7 @@ public class UniversityLinkService {
         // 3. Update Domain Email for ADMIN + UNIVERSITY LINK
         if (req.getDomainEmail() != null && !req.getDomainEmail().isBlank()) {
 
-            Admin admin = adminRepository.findByUniversity_UniversityId(req.getUniversityId())
+            Admin admin = adminRepository.findByEmail(req.getEmail())
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
 
             admin.setEmailDomain(req.getDomainEmail());
