@@ -6,10 +6,9 @@ public enum AccountStatus {
     PENDING(0),
     APPROVED(1),
     REJECTED(2),
-    VERIFIED(3),
-    ACTIVATE(4),
-    DEACTIVATE(5),
-    FORGOT_PASSWORD(6);
+    ACTIVATE(3),
+    DEACTIVATE(4),
+    FORGOT_PASSWORD(5);
 
     private final int code;
 

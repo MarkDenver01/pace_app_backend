@@ -284,7 +284,7 @@ public class SuperAdminController {
         Admin request = admin.get();
         AccountStatus currentStatus = request.getUserAccountStatus();
 
-        if (currentStatus == AccountStatus.VERIFIED || currentStatus == AccountStatus.ACTIVATE) {
+        if (currentStatus == AccountStatus.ACTIVATE) {
             request.setUserAccountStatus(AccountStatus.DEACTIVATE);
         } else if (currentStatus == AccountStatus.DEACTIVATE) {
             request.setUserAccountStatus(AccountStatus.ACTIVATE);

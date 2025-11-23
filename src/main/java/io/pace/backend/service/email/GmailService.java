@@ -76,8 +76,8 @@ public class GmailService {
     }
 
     public void sendEmail(String to, String userName) {
-        String subject = "[PACE] ACCOUNT VERIFIED";
-        String text = "Hello " + userName + ", \n\nYour account has been verified.\n" +
+        String subject = "[PACE] ACCOUNT ACTIVATION";
+        String text = "Hello " + userName + ", \n\nYour account has been activated.\n" +
                 "You can now log in.";
         sendMessage(to, subject, text);
     }
@@ -85,7 +85,7 @@ public class GmailService {
     public void sendVerificationCode(String to, String verificationCode) {
         String subject = "ACCOUNT VERIFICATION";
         String text = "Thanks for registering the account, your registration is successful." +
-                "\nTo complete the activation process, just enter the verification code below on the mobile app." +
+                "\nTo complete the activation process, just enter the activation code below on the mobile app." +
                 "\nVERIFICATION CODE: " + verificationCode;
         sendMessage(to, subject, text);
     }
