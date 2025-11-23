@@ -467,12 +467,9 @@ public class  UserController {
     }
 
     @PostMapping("/public/reset_password")
-    public ResponseEntity<?> confirmResetPassword(
-            @RequestParam("token") String encryptedToken,
-            @RequestParam("newPassword") String newPassword
-    ) {
+    public ResponseEntity<?> confirmResetPassword(@RequestBody ResetPasswordRequest request) {
         try {
-            userService.resetPassword(encryptedToken, newPassword);
+            userService.resetPassword(request.getToken(), request.getNewPassword());
             return ResponseEntity.ok(new MessageResponse("Password reset successful"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
