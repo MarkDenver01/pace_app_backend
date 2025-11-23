@@ -6,6 +6,7 @@ import io.pace.backend.domain.enums.RoleState;
 import io.pace.backend.domain.model.entity.*;
 import io.pace.backend.domain.model.request.CustomizationRequest;
 import io.pace.backend.domain.model.request.RegisterRequest;
+import io.pace.backend.domain.model.request.UpdateUniversityInfoRequest;
 import io.pace.backend.domain.model.response.*;
 import io.pace.backend.repository.RoleRepository;
 import io.pace.backend.repository.UniversityRepository;
@@ -233,6 +234,14 @@ public class AdminController {
     public ResponseEntity<Map<String, String>> getDomainEmailByUniversityId(@RequestParam("universityId") Long universityId) {
         String domainEmail = universityLinkService.getEmailDomain(universityId);
         return ResponseEntity.ok(Map.of("emailDomain", domainEmail != null ? domainEmail : ""));
+    }
+
+    @PatchMapping("/api/link/update_domain")
+    public ResponseEntity<?> updateUniversityInfo(
+            @RequestBody UpdateUniversityInfoRequest request
+    ) {
+        universityLinkService.updateUniversityDetails(request);
+        return ResponseEntity.ok("University information updated successfully.");
     }
 
     @GetMapping("/api/course/active/all")
