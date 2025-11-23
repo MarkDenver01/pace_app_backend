@@ -12,12 +12,12 @@ public interface QuestionRepository extends JpaRepository<Questions, Long> {
     List<Questions> findByCourse_CourseId(Long courseId);
 
     @Query("""
-                SELECT q 
+                SELECT q
                 FROM Questions q
                 JOIN q.course c
-                JOIN UniversityCourse uc ON uc.course = c
+                JOIN c.universityCourses uc
                 WHERE uc.university.universityId = :universityId
-                AND uc.status = 'ACTIVE'
+                  AND uc.status = 'Active'
             """)
     List<Questions> findActiveQuestionsByUniversity(Long universityId);
 }
