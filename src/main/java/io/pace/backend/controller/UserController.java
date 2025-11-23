@@ -483,6 +483,14 @@ public class  UserController {
         return ResponseEntity.ok(questionService.getAllQuestions());
     }
 
+    @GetMapping("/public/questions/{universityId}")
+    public ResponseEntity<List<QuestionResponse>> getQuestionsByUniversity(
+            @PathVariable Long universityId
+    ) {
+        return ResponseEntity.ok(questionService.getQuestionsByUniversity(universityId));
+    }
+
+
     @PostMapping("/public/course_recommended/top3")
     public ResponseEntity<List<CourseMatchResponse>> getRecommendedCourse(@RequestBody List<AnsweredQuestionRequest> answers) {
         List<CourseMatchResponse> results = courseRecommendationService.getTopCourses(answers);

@@ -43,6 +43,20 @@ public class QuestionService {
                 .values());
     }
 
+    public List<QuestionResponse> getQuestionsByUniversity(Long universityId) {
+        return questionRepository.findActiveQuestionsByUniversity(universityId)
+                .stream()
+                .map(q -> new QuestionResponse(
+                        q.getQuestionId(),
+                        q.getQuestion(),
+                        q.getCategory().name(),
+                        q.getCourse().getCourseName(),
+                        q.getCourse().getCourseDescription()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
     public List<QuestionResponse> getQuestionsByCourse(Long courseId) {
         return questionRepository.findByCourse_CourseId(courseId).stream()
                 .map(q -> new QuestionResponse(
