@@ -75,16 +75,6 @@ public class UniversityLinkService {
             throw new RuntimeException("University ID is required");
         }
 
-        // 1. Load University
-        University university = universityRepository.findByUniversityId(req.getUniversityId())
-                .orElseThrow(() -> new RuntimeException("University not found"));
-
-        // 2. Update University Name
-        if (req.getUniversityName() != null && !req.getUniversityName().isBlank()) {
-            university.setUniversityName(req.getUniversityName());
-            universityRepository.save(university);
-        }
-
         // 3. Update Domain Email for ADMIN + UNIVERSITY LINK
         if (req.getDomainEmail() != null && !req.getDomainEmail().isBlank()) {
 
@@ -108,13 +98,12 @@ public class UniversityLinkService {
                 throw new RuntimeException("New password and confirm password do not match");
             }
 
-            Admin admin = adminRepository.findByUniversity_UniversityId(req.getUniversityId())
-                    .orElseThrow(() -> new RuntimeException("Admin not found"));
-
-            User user = admin.getUser();
-            if (user == null) {
-                throw new RuntimeException("Admin is not linked to a user account");
+            if (req.getEmail() == null || req.getEmail().isBlank()) {
+                throw new RuntimeException("User not found.");
             }
+
+            User user = userRepository.findByEmail(req.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found for email: " + req.getEmail()));
 
             user.setPassword(passwordEncoder.encode(req.getNewPassword()));
             userRepository.save(user);

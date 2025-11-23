@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class UpdateUniversityInfoRequest {
     private Long universityId;
+    private String email;
 
     private String universityName;
     private String domainEmail;
